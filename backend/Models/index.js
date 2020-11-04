@@ -26,6 +26,17 @@ database.sequelize = sequelizeInstance;
 
 //Create model
 database.User = require('./user.model')(sequelizeInstance, Sequelize);
+database.Collection = require('./collection.model')(sequelizeInstance, Sequelize);
+
+//Create one-to-many relationship
+database.User.hasMany(database.Collection, {
+    as: "collections"
+});
+
+database.Collection.belongsTo(database.User, {
+    foreignKey: "userId",
+    as: "user"
+});
 
 //Export database
 module.exports = database;

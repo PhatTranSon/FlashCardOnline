@@ -50,7 +50,13 @@ exports.validateAccount = async (req, resp) => {
                     id: user.id
                 };
 
-                const accessToken = jwt.sign(data, ACCESS_TOKEN_SECRET);
+                const accessToken = jwt.sign(
+                    data, 
+                    ACCESS_TOKEN_SECRET,
+                    {
+                        expiresIn: '24h'
+                    }
+                );
 
                 //Give back to user
                 resp.json({
