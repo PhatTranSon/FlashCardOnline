@@ -2,6 +2,10 @@
 const database = require('../Models');
 const User = database.User;
 
+//Import JWT library to generate web token
+const ACCESS_TOKEN_SECRET = require('../token.config').ACCESS_TOKEN_SECRET;
+const jwt = require('jsonwebtoken');
+
 //Create controllers for authentication
 exports.createAccount = async (req, resp) => {
     //Get username and password from request object
@@ -41,8 +45,17 @@ exports.validateAccount = async (req, resp) => {
 
             //If valid
             if (isValidPassword) {
+                //Generate a web token
+                const data = {
+                    id: user.id
+                };
+
+                const accessToken = jwt.sign(data, ACCESS_TOKEN_SECRET);
+
+                //Give back to user
                 resp.json({
-                    message: "Successfully logged in"
+                    message: "Successfully logged in",
+                    accessToken
                 });
             } else {
                 resp.json({
@@ -53,8 +66,6 @@ exports.validateAccount = async (req, resp) => {
             resp.end();
         })
         .catch((error) => {
-            //Debug
-            console.log(error);
             //Error handling -> Later
             resp.status(500).send({
                 message: "Error validating account"
