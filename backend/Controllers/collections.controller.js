@@ -1,5 +1,6 @@
 const database = require('../Models/index');
 const Collection = database.Collection;
+const CollectionLike = database.CollectionLike;
 
 exports.getAllCollections = (req, resp) => {
     //Get user id
@@ -153,6 +154,66 @@ exports.deleteCollection = (req, resp) => {
             console.log(error);
             resp.status(500).json({
                 message: "Error finding collection"
+            });
+            resp.end();
+        });
+}
+
+//Function to like the collection
+exports.likeCollection = (req, resp) => {
+    //Get user id
+    const userId = req.user.id;
+
+    //Get collection id through body
+    const { collectionId } = req.body;
+
+    //Check if user has liked post already
+    CollectionLike
+        .findOne({
+            where: {
+                userId,
+                collectionId
+            }
+        })
+        .then(like => {
+            if (like) {
+                //User already like the collection -> Through error
+                resp.status(403).json({
+                    message: "Collection already liked"
+                });
+                resp.end();
+            } else {
+                //Create new like
+                const data = {
+                    userId, 
+                    collectionId
+                };
+
+                CollectionLike
+                    .create(data)
+                    .then(newLike => {
+                        resp.json({
+                            message: "Successfully like collection",
+                            userId,
+                            collectionId
+                        });
+                        resp.end();
+                    })
+                    .catch(error => {
+                        //Debug
+                        console.log(error);
+                        resp.status(500).json({
+                            message: "Error liking collection"
+                        });
+                        resp.end();
+                    });
+            }
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error liking collection"
             });
             resp.end();
         });
