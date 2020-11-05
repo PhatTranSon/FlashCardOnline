@@ -27,8 +27,9 @@ database.sequelize = sequelizeInstance;
 //Create model
 database.User = require('./user.model')(sequelizeInstance, Sequelize);
 database.Collection = require('./collection.model')(sequelizeInstance, Sequelize);
+database.Card = require('./card.model')(sequelizeInstance, Sequelize);
 
-//Create one-to-many relationship
+//Create one-to-many relationship from user to collection
 database.User.hasMany(database.Collection, {
     as: "collections"
 });
@@ -37,6 +38,16 @@ database.Collection.belongsTo(database.User, {
     foreignKey: "userId",
     as: "user"
 });
+
+//Create one-to-many relationship from collection to cards
+database.Collection.hasMany(database.Card, {
+    as: "card"
+});
+
+database.Card.belongsTo(database.Collection, {
+    foreignKey: "collectionId",
+    as: "collection"
+})
 
 //Export database
 module.exports = database;

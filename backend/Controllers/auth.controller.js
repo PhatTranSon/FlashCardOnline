@@ -18,11 +18,26 @@ exports.createAccount = async (req, resp) => {
     //Create a new user
     User.create(user)
         .then(data => {
+            //Generate a new token
+            const createdUser = {
+                id: data.id
+            }
+
+            const accessToken = jwt.sign(
+                createdUser, 
+                ACCESS_TOKEN_SECRET,
+                {
+                    expiresIn: '24h'
+                }
+            );
+
+
             //Display 
             resp.json({
                 message: "Account created successfully",
                 username: name,
-                password: password
+                password: password,
+                accessToken: accessToken
             });
         })
         .catch(error => {
