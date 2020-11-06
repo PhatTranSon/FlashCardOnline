@@ -12,51 +12,110 @@ function getAllCollectionsNotLoggedIn(req, resp) {
 
 }
 
+//Helpers function to count the number of likes and check if user has liked the post
+function getAllCollectionsLikeCount(userId) {
+    let collectionsLikesCounted = Collection
+    .findAll(
+        {
+            where: {
+                userId
+            },
+            include: [
+                {
+                    //Check if user liked or not
+                    model: User,
+                    attributes: [
+                        "id"
+                    ],
+                    through: {
+                        attributes: ["createdAt"]
+                    },
+                    required: false
+                }
+            ],
+            attributes: {
+                include: [
+                    [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                ]
+            },
+            group: ['collection.id']
+        }
+    );
+
+    return collectionsLikesCounted;
+}
+
+function getAllCollectionsCheckLiked(userId) {
+    let collectionsLikeChecked = Collection
+    .findAll(
+        {
+            where: {
+                userId
+            },
+            include: [
+                {
+                    //Check if user liked or not
+                    model: User,
+                    where: {
+                        id: userId
+                    },
+                    attributes: [ "id", "name" ],
+                    through: {
+                        attributes: ["createdAt"]
+                    },
+                    required: false
+                }
+            ],
+            attributes: {
+                include: [
+                    [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                ]
+            },
+            group: ['collection.id']
+        }
+    );
+
+    return collectionsLikeChecked;
+}
+
 exports.getMineCollections = (req, resp) => {
     //Get user id
     const { id } = req.user;
 
     //Find all collections belong to the userId
-    Collection
-        .findAll(
-            {
-                where: {
-                    userId: id
-                },
-                include: [
+    Promise
+        .all([getAllCollectionsCheckLiked(id), getAllCollectionsLikeCount(id)])
+        .then(response => {
+            //Get the result
+            const checkLiked = response[0];
+            const countLikes = response[1];
+
+            //Create an array to merge rows
+            const results = [];
+
+            //Merge objects from 2 arrays
+            checkLiked.forEach((checkedLikeRow, index) => {
+                //Get the count like row
+                let countedLikesRow = countLikes[index];
+
+                //Create new object and add to result
+                results.push(
                     {
-                        //Check if user liked or not
-                        model: User,
-                        where: {
-                            id
-                        },
-                        attributes: [
-                            "id"
-                        ],
-                        through: {
-                            attributes: ["createdAt"]
-                        },
-                        required: false
+                        id: checkedLikeRow.dataValues.id,
+                        title: checkedLikeRow.dataValues.title,
+                        description: checkedLikeRow.dataValues.description,
+                        createdAt: checkedLikeRow.dataValues.createdAt,
+                        updatedAt: checkedLikeRow.dataValues.updatedAt,
+                        liked: checkedLikeRow.dataValues.liked,
+                        likes: countedLikesRow.dataValues.likes
                     }
-                ]
-            }
-        )
-        .then((collections) => {
-            //Modify the collections object
-            collections = collections.map(collection => {
-                return {
-                    "id": collection.id,
-                    "title": collection.title,
-                    "description": collection.description,
-                    "createdAt": collection.createdAt,
-                    "updatedAt": collection.updatedAt,
-                    "userId": 6,
-                    "liked": collection.users.length > 0 ? true : false
-                }
+                );
             });
 
-            //Return json
-            resp.json(collections);
+            //Serve result
+            resp.json({
+                collections: results
+            });
             resp.end();
         })
         .catch((error) => {
