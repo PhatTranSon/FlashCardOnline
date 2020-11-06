@@ -43,7 +43,7 @@ database.Collection.belongsTo(database.User, {
 
 //Create one-to-many relationship from collection to cards
 database.Collection.hasMany(database.Card, {
-    as: "card"
+    as: "cards"
 });
 
 database.Card.belongsTo(database.Collection, {

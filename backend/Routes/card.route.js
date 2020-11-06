@@ -8,6 +8,9 @@ module.exports = (app) => {
     //View all cards
     app.get('/cards', getUser, controller.viewAllCards);
 
+    //View all cards from users
+    app.get('/mine/cards', validateToken, controller.viewAllCardsFromUser);
+
     //View all cards from collection
     app.get('/cardsfromcollection', getUser, controller.viewAllCardsFromCollections);
 
