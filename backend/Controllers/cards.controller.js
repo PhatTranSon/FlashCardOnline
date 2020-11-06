@@ -1,10 +1,129 @@
 //Import database
 const database = require('../Models/');
+const collectionModel = require('../Models/collection.model');
 const Card = database.Card;
 const Collection = database.Collection;
 const CardLike = database.CardLike;
+const User = database.User;
+
+//Helper methods to get cards along likes
+function getAllCardsLikeCount(collectionId) {
+    let cardsLikesCounted = Card
+    .findAll(
+        {
+            where: {
+                collectionId
+            },
+            include: [
+                {
+                    //Check if user liked or not
+                    model: User,
+                    attributes: [
+                        "id"
+                    ],
+                    through: {
+                        attributes: ["createdAt"]
+                    },
+                    required: false
+                }
+            ],
+            attributes: {
+                include: [
+                    [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                ]
+            },
+            group: ['card.id']
+        }
+    );
+
+    return cardsLikesCounted;
+}
+
+function getAllCardsCheckLiked(collectionId, userId) {
+    let cardsLikeChecked = Card
+    .findAll(
+        {
+            where: {
+                collectionId
+            },
+            include: [
+                {
+                    //Check if user liked or not
+                    model: User,
+                    where: {
+                        id: userId
+                    },
+                    attributes: [ "id", "name" ],
+                    through: {
+                        attributes: ["createdAt"]
+                    },
+                    required: false
+                }
+            ],
+            attributes: {
+                include: [
+                    [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                ]
+            },
+            group: ['card.id']
+        }
+    );
+
+    return cardsLikeChecked;
+}
 
 //Func to perform CRUD operations on Card
+exports.viewAllCardsFromCollection = (req, resp) => {
+    //Get the collection id from body
+    const { collectionId } = req.body;
+    const userId = req.user.id;
+
+    //Collect all cards which belong to the collections
+    Promise.all([getAllCardsCheckLiked(collectionId, userId), getAllCardsLikeCount(collectionId)])
+        .then(response => {
+            //Expand
+            const [checkLiked, countLikes] = response;
+
+            //Combine the data
+            const results = [];
+
+            //Aggregate data
+            //Merge objects from 2 arrays
+            checkLiked.forEach((checkedLikeRow, index) => {
+                //Get the count like row
+                let countedLikesRow = countLikes[index];
+
+                //Create new object and add to result
+                results.push(
+                    {
+                        id: checkedLikeRow.dataValues.id,
+                        title: checkedLikeRow.dataValues.title,
+                        phonetic: checkedLikeRow.dataValues.phonetic,
+                        description: checkedLikeRow.dataValues.description,
+                        createdAt: checkedLikeRow.dataValues.createdAt,
+                        updatedAt: checkedLikeRow.dataValues.updatedAt,
+                        liked: checkedLikeRow.dataValues.liked,
+                        likes: countedLikesRow.dataValues.likes
+                    }
+                );
+            });
+
+            //Respond with data
+            resp.json({
+                cards: results
+            });
+            resp.end();
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting cards"
+            });
+            resp.end();
+        })
+}
+
 exports.createNewCard = (req, resp) => {
     //Get the collection id
     const { collectionId, title, phonetic, description } = req.body;
@@ -184,32 +303,6 @@ exports.deleteCard = (req, resp) => {
             console.log(error);
             resp.status(500).json({
                 message: "Error deleting card"
-            });
-            resp.end();
-        });
-}
-
-exports.viewAllCards = (req, resp) => {
-    //Get the collection id from body
-    const { collectionId } = req.body;
-
-    //Collect all cards which belong to the collections
-    Card
-        .findAll({
-            where: {
-                collectionId
-            }
-        })
-        .then(cards => {
-            resp.json({
-                cards
-            });
-            resp.end();
-        })
-        .catch(error => {
-            console.log(error);
-            resp.status(500).json({
-                message: "Error retrieving card"
             });
             resp.end();
         });

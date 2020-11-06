@@ -6,7 +6,7 @@ const { validateToken } = require('../Helpers/auth.helper');
 
 module.exports = (app) => {
     app.post('/cards', validateToken, controller.createNewCard);
-    app.get('/cards', validateToken, controller.viewAllCards);
+    app.get('/cards', validateToken, controller.viewAllCardsFromCollection);
     app.put('/cards', validateToken, controller.updateCard);
     app.delete('/cards', validateToken, controller.deleteCard);
 
