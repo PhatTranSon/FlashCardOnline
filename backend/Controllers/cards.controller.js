@@ -18,9 +18,7 @@ function getAllCardsLikeCount(collectionId) {
                 {
                     //Check if user liked or not
                     model: User,
-                    attributes: [
-                        "id"
-                    ],
+                    attributes: [],
                     through: {
                         attributes: ["createdAt"]
                     },
@@ -53,7 +51,7 @@ function getAllCardsCheckLiked(collectionId, userId) {
                     where: {
                         id: userId
                     },
-                    attributes: [ "id", "name" ],
+                    attributes: [],
                     through: {
                         attributes: ["createdAt"]
                     },
@@ -72,8 +70,8 @@ function getAllCardsCheckLiked(collectionId, userId) {
     return cardsLikeChecked;
 }
 
-//Func to perform CRUD operations on Card
-exports.viewAllCardsFromCollection = (req, resp) => {
+//Func to get all cards from collection -> Logged in case
+function viewAllCardsFromCollectionLoggedIn(req, resp) {
     //Get the collection id from body
     const { collectionId } = req.body;
     const userId = req.user.id;
@@ -121,7 +119,180 @@ exports.viewAllCardsFromCollection = (req, resp) => {
                 message: "Error getting cards"
             });
             resp.end();
+        });
+}
+
+//Func to get all cards from collection -> Not logged in case
+function viewAllCardsFromCollectionNotLoggedIn(req, resp) {
+    //Get the collection id from body
+    const { collectionId } = req.body;
+
+    //Collect all cards which belong to the collections
+    getAllCardsLikeCount(collectionId)
+        .then(results => {
+            //Respond with data
+            resp.json({
+                cards: results
+            });
+            resp.end();
         })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting cards"
+            });
+            resp.end();
+        });
+}
+
+//Func to get all cards -> Logged in case
+function viewAllCardsLoggedIn(req, resp) {
+    //Get user id
+    const userId = req.user.id;
+
+    let cardsLikesCounted = Card
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        attributes: [],
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                group: ['card.id']
+            }
+        );
+
+    let cardsLikeChecked = Card
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [],
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                    ]
+                },
+                group: ['card.id']
+            }
+        );
+
+    Promise.all([cardsLikeChecked, cardsLikesCounted])
+        .then(response => {
+            //Expand
+            const [checkLiked, countLikes] = response;
+
+            //Combine the data
+            const results = [];
+
+            //Aggregate data
+            //Merge objects from 2 arrays
+            checkLiked.forEach((checkedLikeRow, index) => {
+                //Get the count like row
+                let countedLikesRow = countLikes[index];
+
+                //Create new object and add to result
+                results.push(
+                    {
+                        id: checkedLikeRow.dataValues.id,
+                        title: checkedLikeRow.dataValues.title,
+                        phonetic: checkedLikeRow.dataValues.phonetic,
+                        description: checkedLikeRow.dataValues.description,
+                        createdAt: checkedLikeRow.dataValues.createdAt,
+                        updatedAt: checkedLikeRow.dataValues.updatedAt,
+                        liked: checkedLikeRow.dataValues.liked,
+                        likes: countedLikesRow.dataValues.likes
+                    }
+                );
+            });
+
+            //Respond with data
+            resp.json({
+                cards: results
+            });
+            resp.end();
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting cards"
+            });
+            resp.end();
+    });
+}
+
+//Func to get all cards -> Not logged in case
+function viewAllCardsNotLoggedIn(req, resp) {
+    let cardsLikesCounted = Card
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        attributes: [],
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                group: ['card.id']
+            }
+        );
+
+    cardsLikesCounted
+            .then(cards => {
+                resp.json({
+                    cards
+                });
+                resp.send();
+            })
+            .catch(error => {
+                //Debug
+                console.log(error);
+                resp.status(500).json({
+                    message: "Error getting cards"
+                });
+                resp.end();
+            });
+}
+
+//Func to perform CRUD operations on Card
+exports.viewAllCards = (req, resp) => {
+    if (req.user) {
+        viewAllCardsLoggedIn(req, resp);
+    } else {
+        viewAllCardsNotLoggedIn(req, resp);
+    }
+}
+
+exports.viewAllCardsFromCollections = (req, resp) => {
+    if (req.user) {
+        viewAllCardsFromCollectionLoggedIn(req, resp);
+    } else {
+        viewAllCardsFromCollectionNotLoggedIn(req, resp);
+    }
 }
 
 exports.createNewCard = (req, resp) => {

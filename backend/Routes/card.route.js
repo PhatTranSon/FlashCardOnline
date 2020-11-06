@@ -2,11 +2,16 @@
 const controller =  require('../Controllers/cards.controller');
 
 //Import authentication helper
-const { validateToken } = require('../Helpers/auth.helper');
+const { validateToken, getUser } = require('../Helpers/auth.helper');
 
 module.exports = (app) => {
+    //View all cards
+    app.get('/cards', getUser, controller.viewAllCards);
+
+    //View all cards from collection
+    app.get('/cardsfromcollection', getUser, controller.viewAllCardsFromCollections);
+
     app.post('/cards', validateToken, controller.createNewCard);
-    app.get('/cards', validateToken, controller.viewAllCardsFromCollection);
     app.put('/cards', validateToken, controller.updateCard);
     app.delete('/cards', validateToken, controller.deleteCard);
 
