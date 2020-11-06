@@ -11,6 +11,9 @@ module.exports = (app) => {
     //View all cards from collection
     app.get('/cardsfromcollection', getUser, controller.viewAllCardsFromCollections);
 
+    //View all liked cards
+    app.get('/mine/cards/liked', validateToken, controller.viewAllLikedCards);
+
     app.post('/cards', validateToken, controller.createNewCard);
     app.put('/cards', validateToken, controller.updateCard);
     app.delete('/cards', validateToken, controller.deleteCard);

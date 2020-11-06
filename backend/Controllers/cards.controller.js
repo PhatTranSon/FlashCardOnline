@@ -287,6 +287,52 @@ exports.viewAllCards = (req, resp) => {
     }
 }
 
+//Func to view all liked cards
+exports.viewAllLikedCards = (req, resp) => {
+    //Get user id
+    const userId = req.user.id;
+
+    let cardsLikesCounted = Card
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [],
+                        required: true
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                group: ['card.id']
+            }
+        );
+
+    //Get cards and respond
+    cardsLikesCounted
+        .then(cards => {
+            resp.json({
+                cards
+            });
+            resp.send();
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting cards"
+            });
+            resp.end();
+        });
+}
+
 exports.viewAllCardsFromCollections = (req, resp) => {
     if (req.user) {
         viewAllCardsFromCollectionLoggedIn(req, resp);
