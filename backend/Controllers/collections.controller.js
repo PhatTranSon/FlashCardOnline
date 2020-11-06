@@ -1,19 +1,61 @@
 const database = require('../Models/index');
 const Collection = database.Collection;
 const CollectionLike = database.CollectionLike;
+const User = database.User;
 
-exports.getAllCollections = (req, resp) => {
+//Helper methods for multiple versions of get collection
+function getAllCollectionsLoggedIn(req, resp) {
+
+} 
+
+function getAllCollectionsNotLoggedIn(req, resp) {
+
+}
+
+exports.getMineCollections = (req, resp) => {
     //Get user id
     const { id } = req.user;
 
     //Find all collections belong to the userId
     Collection
-        .findAll({
-            where: {
-                userId: id
+        .findAll(
+            {
+                where: {
+                    userId: id
+                },
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id
+                        },
+                        attributes: [
+                            "id"
+                        ],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ]
             }
-        })
+        )
         .then((collections) => {
+            //Modify the collections object
+            collections = collections.map(collection => {
+                return {
+                    "id": collection.id,
+                    "title": collection.title,
+                    "description": collection.description,
+                    "createdAt": collection.createdAt,
+                    "updatedAt": collection.updatedAt,
+                    "userId": 6,
+                    "liked": collection.users.length > 0 ? true : false
+                }
+            });
+
+            //Return json
             resp.json(collections);
             resp.end();
         })
@@ -204,6 +246,57 @@ exports.likeCollection = (req, resp) => {
                         console.log(error);
                         resp.status(500).json({
                             message: "Error liking collection"
+                        });
+                        resp.end();
+                    });
+            }
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error liking collection"
+            });
+            resp.end();
+        });
+}
+
+//Function to like the collection
+exports.unlikeCollection = (req, resp) => {
+    //Get user id
+    const userId = req.user.id;
+
+    //Get collection id through body
+    const { collectionId } = req.body;
+
+    //Check if user has liked post already
+    CollectionLike
+        .findOne({
+            where: {
+                userId,
+                collectionId
+            }
+        })
+        .then(like => {
+            if (!like) {
+                //User already like the collection -> Through error
+                resp.status(403).json({
+                    message: "Collection is not yet liked"
+                });
+                resp.end();
+            } else {
+                like.destroy()
+                    .then(data => {
+                        resp.json({
+                            message: "Successfully unliked collection"
+                        });
+                        resp.end();
+                    })
+                    .catch(error => {
+                        //Debug
+                        console.log(error);
+                        resp.status(500).json({
+                            message: "Error unliking collection"
                         });
                         resp.end();
                     });
