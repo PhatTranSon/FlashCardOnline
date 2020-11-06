@@ -9,4 +9,8 @@ module.exports = (app) => {
     app.get('/cards', validateToken, controller.viewAllCards);
     app.put('/cards', validateToken, controller.updateCard);
     app.delete('/cards', validateToken, controller.deleteCard);
+
+    //Like
+    app.post('/cards/likes', validateToken, controller.likeCard);
+    app.delete('/cards/likes', validateToken, controller.unlikeCard);
 }

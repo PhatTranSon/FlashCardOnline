@@ -2,6 +2,7 @@
 const database = require('../Models/');
 const Card = database.Card;
 const Collection = database.Collection;
+const CardLike = database.CardLike;
 
 //Func to perform CRUD operations on Card
 exports.createNewCard = (req, resp) => {
@@ -31,6 +32,7 @@ exports.createNewCard = (req, resp) => {
                         //Response
                         resp.json({
                             message: "Successfully created card",
+                            id: card.title,
                             title: card.title,
                             phonetic: card.phonetic,
                             description: card.description
@@ -208,6 +210,115 @@ exports.viewAllCards = (req, resp) => {
             console.log(error);
             resp.status(500).json({
                 message: "Error retrieving card"
+            });
+            resp.end();
+        });
+}
+
+exports.likeCard = (req, resp) => {
+   //Get user id
+   const userId = req.user.id;
+
+   //Get collection id through body
+   const { cardId } = req.body;
+
+   //Check if user has liked post already
+    CardLike
+       .findOne({
+           where: {
+               userId,
+               cardId
+           }
+       })
+       .then(like => {
+           if (like) {
+               //User already like the collection -> Through error
+               resp.status(403).json({
+                   message: "Card already liked"
+               });
+               resp.end();
+           } else {
+               //Create new like
+               const data = {
+                   userId, 
+                   cardId
+               };
+
+               CardLike
+                   .create(data)
+                   .then(newLike => {
+                       resp.json({
+                           message: "Successfully liked card",
+                           userId,
+                           cardId
+                       });
+                       resp.end();
+                   })
+                   .catch(error => {
+                       //Debug
+                       console.log(error);
+                       resp.status(500).json({
+                           message: "Error liking card"
+                       });
+                       resp.end();
+                   });
+           }
+       })
+       .catch(error => {
+           //Debug
+           console.log(error);
+           resp.status(500).json({
+               message: "Error liking card"
+           });
+           resp.end();
+       });
+}
+
+exports.unlikeCard = (req, resp) => {
+    //Get user id
+    const userId = req.user.id;
+
+    //Get collection id through body
+    const { cardId } = req.body;
+
+    //Check if user has liked post already
+    CardLike
+        .findOne({
+            where: {
+                userId,
+                cardId
+            }
+        })
+        .then(like => {
+            if (!like) {
+                //User already like the collection -> Through error
+                resp.status(403).json({
+                    message: "Card is not yet liked"
+                });
+                resp.end();
+            } else {
+                like.destroy()
+                    .then(data => {
+                        resp.json({
+                            message: "Successfully unliked card"
+                        });
+                        resp.end();
+                    })
+                    .catch(error => {
+                        //Debug
+                        console.log(error);
+                        resp.status(500).json({
+                            message: "Error unliking card"
+                        });
+                        resp.end();
+                    });
+            }
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error liking card"
             });
             resp.end();
         });
