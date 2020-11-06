@@ -3,15 +3,6 @@ const Collection = database.Collection;
 const CollectionLike = database.CollectionLike;
 const User = database.User;
 
-//Helper methods for multiple versions of get collection
-function getAllCollectionsLoggedIn(req, resp) {
-
-} 
-
-function getAllCollectionsNotLoggedIn(req, resp) {
-
-}
-
 //Helpers function to count the number of likes and check if user has liked the post
 function getAllCollectionsLikeCount(userId) {
     let collectionsLikesCounted = Collection
@@ -78,7 +69,161 @@ function getAllCollectionsCheckLiked(userId) {
     return collectionsLikeChecked;
 }
 
-exports.getMineCollections = (req, resp) => {
+//Get all collections
+exports.getAllCollections = (req, resp) => {
+    if (req.user) {
+        //console.log("LOGGED IN");
+        getAllCollectionsLoggedIn(req, resp);
+    } else {
+        getAllCollectionsNotLoggedIn(req, resp);
+    }
+}
+
+//Get all collections in the database -> For non-user
+function getAllCollectionsNotLoggedIn(req, resp) {
+    Collection
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        attributes: [],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        )
+        .then(collections => {
+            //Serve result
+            resp.json({
+                collections
+            });
+            resp.end();
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting collections"
+            });
+            resp.end();
+        });
+}
+
+//Get all collections in the database -> For non-user
+function getAllCollectionsLoggedIn(req, resp) {
+    //Get user id 
+    let userId = req.user.id;
+
+    let collectionsLikesCounted = Collection
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        attributes: [
+                            "id"
+                        ],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        );
+
+    let collectionsLikeChecked = Collection
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [ "id", "name" ],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        );
+
+    //Find all collections belong to the userId
+    Promise
+        .all([collectionsLikeChecked, collectionsLikesCounted])
+        .then(response => {
+            //Get the result
+            const checkLiked = response[0];
+            const countLikes = response[1];
+
+            //Create an array to merge rows
+            const results = [];
+
+            //Merge objects from 2 arrays
+            checkLiked.forEach((checkedLikeRow, index) => {
+                //Get the count like row
+                let countedLikesRow = countLikes[index];
+
+                //Create new object and add to result
+                results.push(
+                    {
+                        id: checkedLikeRow.dataValues.id,
+                        title: checkedLikeRow.dataValues.title,
+                        description: checkedLikeRow.dataValues.description,
+                        createdAt: checkedLikeRow.dataValues.createdAt,
+                        updatedAt: checkedLikeRow.dataValues.updatedAt,
+                        liked: checkedLikeRow.dataValues.liked,
+                        likes: countedLikesRow.dataValues.likes
+                    }
+                );
+            });
+
+            //Serve result
+            resp.json({
+                collections: results
+            });
+            resp.end();
+        })
+        .catch((error) => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting collections"
+            });
+            resp.end();
+        });
+}
+
+//Get all collections belongs to a user
+exports.getMyCollections = (req, resp) => {
     //Get user id
     const { id } = req.user;
 
@@ -123,6 +268,52 @@ exports.getMineCollections = (req, resp) => {
             console.log(error);
             resp.status(500).json({
                 message: "Error getting collections"
+            });
+            resp.end();
+        });
+}
+
+//Get liked collections
+exports.getLikedCollections = (req, resp) => {
+    //Get user id
+    const userId = req.user.id;
+
+    Collection
+        .findAll(
+            {
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: true //Inner join -> Get only the collections user liked
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        )
+        .then(collections => {
+            //Serve result
+            resp.json({
+                collections
+            });
+            resp.end();
+        })
+        .catch(error => {
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting collection"
             });
             resp.end();
         });
