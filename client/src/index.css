@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;800&display=swap');
+
+body, html {
+    font-family: 'Raleway', sans-serif;
+}
+
+/* General unviversial styling*/
+.blue-underlined {
+    padding-bottom: 2vh;
+    border-bottom: 4px solid #457b9d;
+}
+
+.blue-label {
+    color: #457B9D;
+    font-weight: 400;
+    font-size: 3vh;
+}
+
+.blue-button {
+    color: white;
+    background: #457b9d;
+    border-radius: 4vh;
+}
+
+.round-input {
+    border-radius: 4vh;
+}

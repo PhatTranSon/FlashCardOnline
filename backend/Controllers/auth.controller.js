@@ -1,10 +1,29 @@
 //Import database and model
 const database = require('../Models');
+const { ValidationError } = database.Sequelize
 const User = database.User;
 
 //Import JWT library to generate web token
 const ACCESS_TOKEN_SECRET = require('../token.config').ACCESS_TOKEN_SECRET;
 const jwt = require('jsonwebtoken');
+
+//Custom method to handle validation error
+function extractUserValidationMessage(e) {
+    //Get only the first error key
+    const errorKey = e.errors[0].validatorKey;
+    //console.log(errorKey);
+
+    //Check the key
+    if (errorKey === 'isEmail') {
+        return "Username must be in the form of an email";
+    } else if (errorKey === 'len') {
+        return "Please choose password with length 8 - 20";
+    } else if (errorKey === 'not_unique') {
+        return "Username already used";
+    } else {
+        return "Please select another username";
+    }
+}
 
 //Create controllers for authentication
 exports.createAccount = async (req, resp) => {
@@ -41,10 +60,21 @@ exports.createAccount = async (req, resp) => {
             });
         })
         .catch(error => {
-            //Error handling -> Later
-            resp.status(500).send({
-                message: "Error creating account"
-            })
+            //Check validation error
+            if (error instanceof ValidationError) {
+                //Get the message
+                const message = extractUserValidationMessage(error);
+
+                //Response with message
+                resp.status(500).send({
+                    message
+                });
+            } else {
+                //Error handling -> Later
+                resp.status(500).send({
+                    message: "Unknown error creating account"
+                });
+            }
         });
 }
 

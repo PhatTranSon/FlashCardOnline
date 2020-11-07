@@ -4,10 +4,17 @@ module.exports = (sequelize, Sequelize) => {
     //Create user model
     const User = sequelize.define("user", {
         name: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            unique: true,
+            validate: {
+                isEmail: true
+            }
         },
         password: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            validate: {
+                len: [8, 20]
+            }
         }
     }, {
         hooks: {
