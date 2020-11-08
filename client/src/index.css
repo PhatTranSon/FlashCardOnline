@@ -25,3 +25,8 @@ body, html {
 .round-input {
     border-radius: 4vh;
 }
+
+.form-error-message {
+    color: #e63946;
+    font-size: 2vh;
+}

@@ -27,6 +27,7 @@ function extractUserValidationMessage(e) {
 
 //Create controllers for authentication
 exports.createAccount = async (req, resp) => {
+    console.log(req.body);
     //Get username and password from request object
     const name = req.body.name, password = req.body.password;
     const user = {
@@ -70,6 +71,7 @@ exports.createAccount = async (req, resp) => {
                     message
                 });
             } else {
+                console.log(error);
                 //Error handling -> Later
                 resp.status(500).send({
                     message: "Unknown error creating account"

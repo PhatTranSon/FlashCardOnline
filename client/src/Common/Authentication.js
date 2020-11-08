@@ -1,10 +1,8 @@
 const axios = require('axios');
-const { response } = require('express');
-const { access } = require('fs');
-const qs = require('querystring');
+const qs = require('qs');
 
-//Constants for URL
-axios.defaults.baseURL = "localhost";
+//Constant for URL
+axios.defaults.baseURL = "http://localhost:8000";
 
 //Helper method to make www-form-urlencoded request
 function makeRequest(url, body, type="get") {
@@ -23,30 +21,36 @@ function makeRequest(url, body, type="get") {
     } else if (type === "put") {
         return axios.put(url, qs.stringify(body), config);
     } else if (type === "delete") {
-        return axios.get(url, qs.stringify(body), config);
+        return axios.delete(url, qs.stringify(body), config);
     }
 }
 
-function signup(name, password) {
-    makeRequest('/auth/create', { name, password }, 'get')
-        .then(response => {
-            //Get the access token
-            const token = response.data.accessToken;
+exports.signup = (name, password)  => {
+    return makeRequest('/auth/create', { name, password }, 'post')
+            .then(response => {
+                //Get the access token
+                const token = response.data.accessToken;
 
-            //Set token therefore log in
-            setAccessToken(token);
-        });
+                //Set token therefore log in
+                setAccessToken(token);
+
+                //Return the response again
+                return response
+            });
 }
 
-function login(name, password) {
-    makeRequest('/auth/validate', { name, password }, 'get')
-        .then(response => {
-            //Get the access token
-            const token = response.data.accessToken;
+exports.login = (name, password) => {
+    return makeRequest('/auth/validate', { name, password }, 'get')
+            .then(response => {
+                //Get the access token
+                const token = response.data.accessToken;
 
-            //Set token therefore log in
-            setAccessToken(token);
-        });
+                //Set token therefore log in
+                setAccessToken(token);
+
+                //Return the response
+                return response;
+            });
 }
 
 function setAccessToken(accessToken) {
@@ -59,9 +63,4 @@ function isLoggedIn() {
 
 function logout() {
     return localStorage.setItem("accessToken", null);
-}
-
-module.exports = {
-    signup,
-    login
 }
