@@ -3,6 +3,8 @@ const Collection = database.Collection;
 const CollectionLike = database.CollectionLike;
 const User = database.User;
 
+const { ValidationError } = database.Sequelize;
+
 //Helpers function to count the number of likes and check if user has liked the post
 function getAllCollectionsLikeCount(userId) {
     let collectionsLikesCounted = Collection
@@ -319,6 +321,19 @@ exports.getLikedCollections = (req, resp) => {
         });
 }
 
+//Helper function to extract validation error
+function extractCollectionValidationMessage(e) {
+    //Get only the first error key
+    const errorKey = e.errors[0].validatorKey;
+
+    //Check the key
+    if (errorKey === 'notEmpty') {
+        return "Collection's title should not be empty";
+    } else {
+        return "Please select another username";
+    }
+}
+
 exports.createCollection = (req, resp) => {
     //Get data from request body
     const { id } = req.user;
@@ -342,12 +357,24 @@ exports.createCollection = (req, resp) => {
             resp.end();
         })
         .catch(error => {
-            //Debug
-            console.log(error);
-            resp.status(500).json({
-                message: "Error creating collection"
-            });
-            resp.end();
+            //Check validation error
+            if (error instanceof ValidationError) {
+                //Extract message
+                const message = extractCollectionValidationMessage(error);
+                
+                //Respond
+                resp.status(500).json({
+                    message
+                });
+                resp.end();
+            } else {
+                //Debug
+                console.log(error);
+                resp.status(500).json({
+                    message: "Error creating collection"
+                });
+                resp.end();
+            }
         });
 }
 
