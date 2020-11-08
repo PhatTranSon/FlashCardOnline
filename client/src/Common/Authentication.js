@@ -57,10 +57,10 @@ function setAccessToken(accessToken) {
     localStorage.setItem("accessToken", accessToken);
 }
 
-function isLoggedIn() {
-    return localStorage.getItem("accessToken") !== null;
+exports.isLoggedIn = () => {
+    return !(localStorage.getItem("accessToken") === null);
 }
 
-function logout() {
+exports.logout = () => {
     return localStorage.setItem("accessToken", null);
 }

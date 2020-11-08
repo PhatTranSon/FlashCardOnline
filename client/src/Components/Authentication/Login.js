@@ -2,10 +2,12 @@ import React from 'react';
 import Panel from './Panel';
 
 import {
-    Link
+    Link,
+    Redirect
 } from 'react-router-dom';
 
 import { login } from '../../Common/Authentication';
+import UserPanel from '../Panel/UserPanel';
 
 class Login extends React.Component {
     constructor(props) {
@@ -14,11 +16,28 @@ class Login extends React.Component {
         //Create states
         this.state = {
             error: false,
-            errorMessage: ""
+            errorMessage: "",
+            loggedIn: false
         }
 
         //Bind method
         this.onFormSubmit = this.onFormSubmit.bind(this);
+    }
+
+    componentDidMount() {
+        //Check passed message
+        let error, errorMessage;
+        if (this.props.location && this.props.location.state) {
+            //Got message
+            error = this.props.location.state.message !== null;
+            errorMessage = this.props.location.state.message;
+
+            //Set state
+            this.setState({
+                error,
+                errorMessage
+            });
+        }
     }
 
     onFormSubmit(event) {
@@ -36,7 +55,9 @@ class Login extends React.Component {
         login(name, password)
             .then(response => {
                 //Successful login
-                console.log('yes');
+                this.setState({
+                    loggedIn: true
+                });
             })
             .catch(error => {
                 //Get error
@@ -60,6 +81,7 @@ class Login extends React.Component {
 
     render() {
         return (
+            this.state.loggedIn ? <Redirect to="/panel"/> : 
             <Panel>
                 <div>
                     <h1 id="right-panel-title">Log in to <span className="blue-underlined">MyCard</span></h1>

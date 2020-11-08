@@ -1,6 +1,10 @@
 import React from 'react';
 import Panel from './Panel';
 
+import {
+    Redirect
+} from 'react-router-dom';
+
 import { signup } from '../../Common/Authentication';
 
 class Signup extends React.Component {
@@ -9,7 +13,8 @@ class Signup extends React.Component {
 
         this.state = {
             error: false,
-            errorMessage: ""
+            errorMessage: "",
+            loggedIn: false
         }
 
         this.onFormSubmit = this.onFormSubmit.bind(this);
@@ -40,8 +45,10 @@ class Signup extends React.Component {
             //If match -> Call signup
             signup(name, password)
                 .then(response => {
-                    //Test
-                    console.log("Success");
+                    //Successful sign up -> Redirect
+                    this.setState({
+                        loggedIn: true
+                    });
                 })
                 .catch(error => {
                     //console.log(error);
@@ -67,6 +74,7 @@ class Signup extends React.Component {
 
     render() {
         return (
+            this.state.loggedIn ? <Redirect to="/panel"/> :
             <Panel>
                 <div>
                     <h1 id="right-panel-title">Sign up to <span className="blue-underlined">MyCard</span></h1>
