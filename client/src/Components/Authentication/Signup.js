@@ -71,7 +71,10 @@ class Signup extends React.Component {
                 <div>
                     <h1 id="right-panel-title">Sign up to <span className="blue-underlined">MyCard</span></h1>
                     {
-                        this.state.error ? <div className="form-error-message">{this.state.errorMessage}</div> : null
+                        this.state.error ? 
+                            <div className="form-error-message">
+                                {this.state.errorMessage}
+                            </div> : null
                     }
                     <form onSubmit={this.onFormSubmit}>
                         <div className="field authentication-field">

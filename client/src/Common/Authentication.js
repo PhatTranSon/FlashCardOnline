@@ -40,7 +40,7 @@ exports.signup = (name, password)  => {
 }
 
 exports.login = (name, password) => {
-    return makeRequest('/auth/validate', { name, password }, 'get')
+    return makeRequest('/auth/validate', { name, password }, 'post')
             .then(response => {
                 //Get the access token
                 const token = response.data.accessToken;

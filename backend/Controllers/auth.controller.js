@@ -111,11 +111,10 @@ exports.validateAccount = async (req, resp) => {
                     accessToken
                 });
             } else {
-                resp.json({
+                resp.status(500).send({
                     message: "Invalid username/password combination"
                 });
             }
-
             resp.end();
         })
         .catch((error) => {
