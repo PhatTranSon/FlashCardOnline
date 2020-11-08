@@ -410,12 +410,23 @@ exports.updateCollection = (req, resp) => {
                         });
                     })
                     .catch(error => {
-                        //Debug
-                        console.log(error);
-                        resp.status(500).json({
-                            message: "Error find collection"
-                        });
-                        resp.end();
+                        if (error instanceof ValidationError) {
+                            //Extract message
+                            const message = extractCollectionValidationMessage(error);
+                            
+                            //Respond
+                            resp.status(500).json({
+                                message
+                            });
+                            resp.end();
+                        } else {
+                            //Debug
+                            console.log(error);
+                            resp.status(500).json({
+                                message: "Error creating collection"
+                            });
+                            resp.end();
+                        }
                     });
             } else {
                 resp.status(403).json({

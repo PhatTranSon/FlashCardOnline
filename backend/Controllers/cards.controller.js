@@ -1,10 +1,11 @@
 //Import database
 const database = require('../Models/');
-const collectionModel = require('../Models/collection.model');
 const Card = database.Card;
 const Collection = database.Collection;
 const CardLike = database.CardLike;
 const User = database.User;
+
+const { ValidationError } = database.Sequelize;
 
 //Helper methods to get cards along likes
 function getAllCardsLikeCount(collectionId) {
@@ -387,6 +388,19 @@ exports.viewAllCardsFromUser = (req, resp) => {
         });
 }
 
+//Helper function to extract validation error
+function extractCardValidationMessage(e) {
+    //Get only the first error key
+    const errorKey = e.errors[0].validatorKey;
+
+    //Check the key
+    if (errorKey === 'notEmpty') {
+        return "Card's title should not be empty";
+    } else {
+        return "Please select another username";
+    }
+}
+
 exports.createNewCard = (req, resp) => {
     //Get the collection id
     const { collectionId, title, phonetic, description } = req.body;
@@ -422,11 +436,24 @@ exports.createNewCard = (req, resp) => {
                         resp.end();
                     })
                     .catch(error => {
-                        console.log(error);
-                        resp.status(500).json({
-                            message: "Error creating card"
-                        });
-                        resp.end();
+                        //Check validation error
+                        if (error instanceof ValidationError) {
+                            //Extract message
+                            const message = extractCardValidationMessage(error);
+                            
+                            //Respond
+                            resp.status(500).json({
+                                message
+                            });
+                            resp.end();
+                        } else {
+                            //Debug
+                            console.log(error);
+                            resp.status(500).json({
+                                message: "Error creating collection"
+                            });
+                            resp.end();
+                        }
                     });
             } else {
                 resp.status(403).json({
@@ -481,11 +508,24 @@ exports.updateCard = (req, resp) => {
                                 resp.end();
                             })
                             .catch(error => {
-                                console.log(error);
-                                resp.status(500).json({
-                                    message: "Error updating card"
-                                });
-                                resp.end();
+                                //Check validation error
+                                if (error instanceof ValidationError) {
+                                    //Extract message
+                                    const message = extractCardValidationMessage(error);
+                                    
+                                    //Respond
+                                    resp.status(500).json({
+                                        message
+                                    });
+                                    resp.end();
+                                } else {
+                                    //Debug
+                                    console.log(error);
+                                    resp.status(500).json({
+                                        message: "Error creating collection"
+                                    });
+                                    resp.end();
+                                }
                             });
                     } else {
                         resp.status(403).json({

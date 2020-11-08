@@ -3,7 +3,10 @@ module.exports = (sequelize, Sequelize) => {
     const Card = sequelize.define('card', {
         title: {
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
         },
         phonetic: {
             type: Sequelize.STRING
