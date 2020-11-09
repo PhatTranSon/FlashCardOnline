@@ -1,0 +1,1 @@
+exports.formatColor = color => '#' + color;

@@ -64,3 +64,7 @@ exports.isLoggedIn = () => {
 exports.logout = () => {
     return localStorage.removeItem("accessToken");
 }
+
+exports.getAccessToken = () => {
+    return localStorage.getItem("accessToken");
+}

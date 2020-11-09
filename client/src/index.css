@@ -4,6 +4,10 @@ body, html {
     font-family: 'Raleway', sans-serif;
 }
 
+body {
+    padding-bottom: 2vh;
+}
+
 /* General unviversial styling*/
 .blue-underlined {
     padding-bottom: 2vh;
@@ -29,4 +33,12 @@ body, html {
 .form-error-message {
     color: #e63946;
     font-size: 2vh;
+}
+
+.green-icon {
+    color: #2A9D8F;
+}
+
+.red-icon {
+    color: #e63946;
 }
