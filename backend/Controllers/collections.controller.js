@@ -332,7 +332,7 @@ function extractCollectionValidationMessage(e) {
     if (errorKey === 'notEmpty') {
         return "Collection's title should not be empty";
     } else if (errorKey === 'len') {
-        return "Collection'color must have be a valid hex value";
+        return "Collection's color must not be empty";
     } else {
         return "Please select another username";
     }
@@ -358,7 +358,9 @@ exports.createCollection = (req, resp) => {
                 id: collection.id,
                 title: collection.title,
                 description: collection.description,
-                color: collection.color
+                color: collection.color,
+                liked: 0,
+                likes: 0
             });
             resp.end();
         })

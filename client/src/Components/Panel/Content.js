@@ -11,8 +11,12 @@ import Modal from './Modal/CreateCollectionModal';
 
 import {
     getAllCollections,
-    getAllCards
+    getAllCards,
+    createCollection
 } from '../../Common/Operations';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
 class Content extends React.Component {
     constructor(props) {
@@ -32,7 +36,10 @@ class Content extends React.Component {
             likedCards: [],
 
             //Show card create modal
-            showCollectionModal: true
+            showCollectionModal: false,
+            modalSuccess: false,
+            modalError: false,
+            modalErrorMessage: ""
         }
 
         //Bind
@@ -42,6 +49,9 @@ class Content extends React.Component {
         this.loadHotCards = this.loadHotCards.bind(this);
         this.loadLikedCollections = this.loadLikedCollections.bind(this);
         this.loadLikedCards = this.loadLikedCards.bind(this);
+        this.toggleModal = this.toggleModal.bind(this);
+        this.createCollection = this.createCollection.bind(this);
+        this.closeModal = this.closeModal.bind(this);
     }
 
     //Component mounted -> Get data
@@ -113,13 +123,70 @@ class Content extends React.Component {
     }
 
     //Handle user interactions
+    toggleModal() {
+        this.setState({
+            showCollectionModal: true
+        });
+    }
+
+    closeModal() {
+        this.setState({
+            showCollectionModal: false
+        });
+    }
+
+    createCollection({ title, color, description }) {
+        //Log
+        //console.log(title, color, description);
+        createCollection(title, description, color)
+            .then(response => {
+                console.log('success');
+                //Get the newly created collection
+                const newCollection = {
+                    id: response.data.id,
+                    title: response.data.title,
+                    description: response.data.description,
+                    color: response.data.color,
+                    likes: response.data.likes,
+                    liked: response.data.liked
+                }
+
+                //Add to state, set modal success
+                this.setState({
+                    myCollections: [...this.state.myCollections, newCollection],
+                    modalSuccess: true,
+                    modalError: false
+                });
+            })
+            .catch(error => {
+                console.log('error');
+                //Get the error
+                const status = error.response.status;
+                const data = error.response.data;
+                
+                //Get the error message
+                const errorMessage = data.message;
+
+                console.log(errorMessage);
+
+                //Set the modal error
+                this.setState({
+                    modalSuccess: false,
+                    modalError: true,
+                    modalErrorMessage: errorMessage
+                });
+            })
+    }
 
     render() {
         //Get state
         const {
             myCollections,
             myCards,
-            showCollectionModal
+            showCollectionModal,
+            modalErrorMessage,
+            modalError,
+            modalSuccess
         } = this.state;
         return (
             <div>
@@ -130,12 +197,24 @@ class Content extends React.Component {
                     </TabChild>
 
                     <TabChild name="Mine">
+                        { /* Collections with add icon */ }
                         <CollectionCards 
-                            title="Your collections"
+                            title={
+                                <p>
+                                    <span style={{marginRight: "2vh"}}>
+                                        Your collections
+                                    </span>
+
+                                    <FontAwesomeIcon 
+                                        icon={ faPlusCircle }
+                                        onClick={() => this.toggleModal()}/>
+                                </p>
+                            }
                             cards={myCollections}/>
 
+                        { /* Cards */ }
                         <FlashCards 
-                            title="Your cards"
+                            title={"Your cards"}
                             cards={myCards}/>
                     </TabChild>
 
@@ -145,7 +224,13 @@ class Content extends React.Component {
                 </TabParent>
 
                 { /* Section for modal */ }
-                <Modal isOpen={showCollectionModal}/>
+                <Modal 
+                    isOpen={showCollectionModal}
+                    success={modalSuccess}
+                    error={modalError}
+                    errorMessage={modalErrorMessage}
+                    onCreateCollection={this.createCollection}
+                    onClose={this.closeModal}/>
             </div>
         )
     }

@@ -14,8 +14,12 @@ class CollectionCardPanel extends React.Component {
                 <h1 className="collection-panel-title">{ title }</h1>
                 <div className="collection-panel">
                     {
-                        cards.map(card => {
-                            return <Card {...card}/>
+                        cards.map((card, index) => {
+                            return ( 
+                                <Card 
+                                    key={index}
+                                    {...card}/>
+                            );
                         })
                     }
                 </div>

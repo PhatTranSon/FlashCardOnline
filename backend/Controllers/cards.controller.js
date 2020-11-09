@@ -439,7 +439,9 @@ exports.createNewCard = (req, resp) => {
                             title: card.title,
                             phonetic: card.phonetic,
                             description: card.description,
-                            color: card.color
+                            color: card.color,
+                            liked: 0,
+                            likes: 0
                         });
                         resp.end();
                     })
