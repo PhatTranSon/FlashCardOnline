@@ -219,7 +219,8 @@ function viewAllCardsLoggedIn(req, resp) {
                         createdAt: checkedLikeRow.dataValues.createdAt,
                         updatedAt: checkedLikeRow.dataValues.updatedAt,
                         liked: checkedLikeRow.dataValues.liked,
-                        likes: countedLikesRow.dataValues.likes
+                        likes: countedLikesRow.dataValues.likes,
+                        color: checkedLikeRow.dataValues.color
                     }
                 );
             });
@@ -392,18 +393,23 @@ exports.viewAllCardsFromUser = (req, resp) => {
 function extractCardValidationMessage(e) {
     //Get only the first error key
     const errorKey = e.errors[0].validatorKey;
+    //console.log(errorKey);
 
     //Check the key
     if (errorKey === 'notEmpty') {
         return "Card's title should not be empty";
+    } else if (errorKey === 'len') {
+        return "Color must be a valid hex value";
+    } else if (errorKey === 'is_null') {
+        return "Please fill in all the fields: title and color";
     } else {
-        return "Please select another username";
+        return "Something went wrong. Try again";
     }
 }
 
 exports.createNewCard = (req, resp) => {
     //Get the collection id
-    const { collectionId, title, phonetic, description } = req.body;
+    const { collectionId, title, phonetic, description, color } = req.body;
 
     //Check if user has authority over collection
     Collection
@@ -420,7 +426,8 @@ exports.createNewCard = (req, resp) => {
                     collectionId,
                     title, 
                     phonetic, 
-                    description
+                    description,
+                    color
                 };
 
                 Card.create(data)
@@ -431,7 +438,8 @@ exports.createNewCard = (req, resp) => {
                             id: card.title,
                             title: card.title,
                             phonetic: card.phonetic,
-                            description: card.description
+                            description: card.description,
+                            color: card.color
                         });
                         resp.end();
                     })
@@ -473,7 +481,7 @@ exports.createNewCard = (req, resp) => {
 
 exports.updateCard = (req, resp) => {
     //Get the card id
-    const { id, title, phonetic, description } = req.body;
+    const { id, title, phonetic, description, color } = req.body;
 
     //Get the card
     Card
@@ -496,6 +504,8 @@ exports.updateCard = (req, resp) => {
                         card.title = title;
                         card.phonetic = phonetic;
                         card.description = description;
+                        card.color = color;
+
                         //Save
                         card.save()
                             .then(newCard => {
@@ -503,7 +513,8 @@ exports.updateCard = (req, resp) => {
                                     message: "Successfully updated card",
                                     title: newCard.title,
                                     phonetic: newCard.phonetic,
-                                    description: newCard.description
+                                    description: newCard.description,
+                                    color: newCard.color
                                 });
                                 resp.end();
                             })

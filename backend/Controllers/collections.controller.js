@@ -203,7 +203,8 @@ function getAllCollectionsLoggedIn(req, resp) {
                         createdAt: checkedLikeRow.dataValues.createdAt,
                         updatedAt: checkedLikeRow.dataValues.updatedAt,
                         liked: checkedLikeRow.dataValues.liked,
-                        likes: countedLikesRow.dataValues.likes
+                        likes: countedLikesRow.dataValues.likes,
+                        color: checkedLikeRow.dataValues.color
                     }
                 );
             });
@@ -254,7 +255,8 @@ exports.getMyCollections = (req, resp) => {
                         createdAt: checkedLikeRow.dataValues.createdAt,
                         updatedAt: checkedLikeRow.dataValues.updatedAt,
                         liked: checkedLikeRow.dataValues.liked,
-                        likes: countedLikesRow.dataValues.likes
+                        likes: countedLikesRow.dataValues.likes,
+                        color: checkedLikeRow.dataValues.color
                     }
                 );
             });
@@ -329,6 +331,8 @@ function extractCollectionValidationMessage(e) {
     //Check the key
     if (errorKey === 'notEmpty') {
         return "Collection's title should not be empty";
+    } else if (errorKey === 'len') {
+        return "Collection'color must have be a valid hex value";
     } else {
         return "Please select another username";
     }
@@ -337,13 +341,14 @@ function extractCollectionValidationMessage(e) {
 exports.createCollection = (req, resp) => {
     //Get data from request body
     const { id } = req.user;
-    const { title, description } = req.body;
+    const { title, description, color } = req.body;
 
     //Create collection
     const collection = {
         userId: id,
         title,
-        description
+        description,
+        color
     }
 
     Collection.create(collection)
@@ -352,7 +357,8 @@ exports.createCollection = (req, resp) => {
                 message: "Successfully created collection",
                 id: collection.id,
                 title: collection.title,
-                description: collection.description
+                description: collection.description,
+                color: collection.color
             });
             resp.end();
         })
@@ -381,7 +387,7 @@ exports.createCollection = (req, resp) => {
 exports.updateCollection = (req, resp) => {
     //Get data from request body
     const { id } = req.user;
-    const { title, description } = req.body;
+    const { title, description, color } = req.body;
 
     //Get collection id from params
     const { collectionId } = req.params;
@@ -398,6 +404,7 @@ exports.updateCollection = (req, resp) => {
                 //Update collection
                 collection.title = title;
                 collection.description = description;
+                collection.color = color;
 
                 //Save
                 collection.save()
@@ -406,7 +413,8 @@ exports.updateCollection = (req, resp) => {
                             message: "Successfully modify collection",
                             id: data.id,
                             title: data.title,
-                            description: data.description
+                            description: data.description,
+                            color: data.color
                         });
                     })
                     .catch(error => {

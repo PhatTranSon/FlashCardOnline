@@ -8,6 +8,14 @@ module.exports = (sequelize, Sequelize) => {
                 notEmpty: true
             }
         },
+        color: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            defaultValue: "e63946",
+            validate: {
+                len: [6, 6]
+            }
+        },
         description: {
             type: Sequelize.STRING
         }
