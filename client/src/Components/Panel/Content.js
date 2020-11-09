@@ -1,9 +1,13 @@
 import React from 'react';
+import './style.css';
+
 import TabChild from './Tab/TabChild';
 import TabParent from './Tab/TabParent';
 
 import CollectionCards from './Collection/CollectionCards';
 import FlashCards from './Card/Cards';
+
+import Modal from './Modal/CreateCollectionModal';
 
 import {
     getAllCollections,
@@ -16,87 +20,8 @@ class Content extends React.Component {
 
         this.state = {
             //My collections and cards
-            myCollections: [
-                //Mock data
-                {
-                    id: 1,
-                    title: "July",
-                    description: "Words on the best of July",
-                    liked: 0,
-                    likes: 12,
-                    color: 'e63946'
-                },
-                {
-                    id: 2,
-                    title: "May",
-                    description: "To may or not to may",
-                    liked: 1,
-                    likes: 20,
-                    color: '457b9d'
-                },
-                {
-                    id: 3,
-                    title: "May",
-                    description: "To may or not to may",
-                    liked: 1,
-                    likes: 20,
-                    color: '2a9d8f'
-                },
-                {
-                    id: 4,
-                    title: "May",
-                    description: "To may or not to may",
-                    liked: 1,
-                    likes: 20,
-                    color: 'ffafcc'
-                }
-            ],
-            myCards: [
-                {
-                    "id": 1,
-                    "title": "Donald Trumpanzese",
-                    "phonetic": "None",
-                    "description": "Soon to be president of USA",
-                    "createdAt": "2020-11-09T04:01:26.000Z",
-                    "updatedAt": "2020-11-09T04:12:16.000Z",
-                    "liked": 0,
-                    "likes": 0,
-                    "color": "6d6875"
-                },
-                {
-                    "id": 2,
-                    "title": "Donald Trumpanzese",
-                    "phonetic": "None",
-                    "description": "Soon to be president of USA",
-                    "createdAt": "2020-11-09T04:01:26.000Z",
-                    "updatedAt": "2020-11-09T04:12:16.000Z",
-                    "liked": 0,
-                    "likes": 0,
-                    "color": "f77f00"
-                },
-                {
-                    "id": 3,
-                    "title": "Donald Trumpanzese",
-                    "phonetic": "None",
-                    "description": "Soon to be president of USA",
-                    "createdAt": "2020-11-09T04:01:26.000Z",
-                    "updatedAt": "2020-11-09T04:12:16.000Z",
-                    "liked": 0,
-                    "likes": 0,
-                    "color": "003049"
-                },
-                {
-                    "id": 4,
-                    "title": "Donald Trumpanzese",
-                    "phonetic": "None",
-                    "description": "Soon to be president of USA",
-                    "createdAt": "2020-11-09T04:01:26.000Z",
-                    "updatedAt": "2020-11-09T04:12:16.000Z",
-                    "liked": 0,
-                    "likes": 0,
-                    "color": "a2d2ff"
-                },
-            ],
+            myCollections: [],
+            myCards: [],
 
             //Hot collections and cards
             hotCollections: [],
@@ -104,7 +29,10 @@ class Content extends React.Component {
 
             //Liked collections and cards
             likedCollections: [],
-            likedCards: []
+            likedCards: [],
+
+            //Show card create modal
+            showCollectionModal: true
         }
 
         //Bind
@@ -187,26 +115,38 @@ class Content extends React.Component {
     //Handle user interactions
 
     render() {
+        //Get state
+        const {
+            myCollections,
+            myCards,
+            showCollectionModal
+        } = this.state;
         return (
-            <TabParent>
-                <TabChild name="Hot">
-                    1
-                </TabChild>
+            <div>
+                { /* Section for tab */ }
+                <TabParent>
+                    <TabChild name="Hot">
+                        1
+                    </TabChild>
 
-                <TabChild name="Mine">
-                    <CollectionCards 
-                        title="Your collections"
-                        cards={this.state.myCollections}/>
+                    <TabChild name="Mine">
+                        <CollectionCards 
+                            title="Your collections"
+                            cards={myCollections}/>
 
-                    <FlashCards 
-                        title="Your cards"
-                        cards={this.state.myCards}/>
-                </TabChild>
+                        <FlashCards 
+                            title="Your cards"
+                            cards={myCards}/>
+                    </TabChild>
 
-                <TabChild name="Liked">
-                    3
-                </TabChild>
-            </TabParent>
+                    <TabChild name="Liked">
+                        3
+                    </TabChild>
+                </TabParent>
+
+                { /* Section for modal */ }
+                <Modal isOpen={showCollectionModal}/>
+            </div>
         )
     }
 }
