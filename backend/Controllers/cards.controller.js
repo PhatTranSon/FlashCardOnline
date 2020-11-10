@@ -268,7 +268,6 @@ function viewAllCardsNotLoggedIn(req, resp) {
                 resp.json({
                     cards
                 });
-                resp.send();
             })
             .catch(error => {
                 //Debug

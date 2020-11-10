@@ -18,6 +18,7 @@ class CollectionModal extends React.Component {
         //Binding
         this.colorChosen = this.colorChosen.bind(this);
         this.onFormSubmit = this.onFormSubmit.bind(this);
+        this.onSuccessButtonClicked = this.onSuccessButtonClicked.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -52,6 +53,10 @@ class CollectionModal extends React.Component {
 
         //Call props method
         this.props.onCreateCollection({ title, description, color });
+    }
+
+    onSuccessButtonClicked() {
+        this.props.onSuccessButtonClicked();
     }
 
     render() {
@@ -98,11 +103,12 @@ class CollectionModal extends React.Component {
                         success ? 
                         <div className="modal-success">
                             <h1 className="modal-success-title">Successfully created collection</h1>
-                            <button 
+                            <a
                                 className="button blue-button"
-                                style={{background: '#2a9d8f', display: "inline-block"}}>
+                                style={{background: '#2a9d8f', display: "inline-block"}}
+                                onClick={() => this.onSuccessButtonClicked()}>
                                 Return
-                            </button>
+                            </a>
                         </div> :
                         <>
                             <h1 className="collection-modal-title">Create flashcard collection</h1>

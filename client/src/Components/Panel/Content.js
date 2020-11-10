@@ -10,13 +10,21 @@ import FlashCards from './Card/Cards';
 import Modal from './Modal/CreateCollectionModal';
 
 import {
+    //Collection operations
     getAllCollections,
-    getAllCards,
-    createCollection
+    createCollection,
+    getMyCollections,
+    deleteCollection,
+    likeCollection,
+    unlikeCollection,
+
+    //Card operations
+    getAllCards
 } from '../../Common/Operations';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { Redirect } from 'react-router-dom';
 
 class Content extends React.Component {
     constructor(props) {
@@ -35,6 +43,9 @@ class Content extends React.Component {
             likedCollections: [],
             likedCards: [],
 
+            //Redirecting
+            unauthorized: false,
+
             //Show card create modal
             showCollectionModal: false,
             modalSuccess: false,
@@ -52,6 +63,9 @@ class Content extends React.Component {
         this.toggleModal = this.toggleModal.bind(this);
         this.createCollection = this.createCollection.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.onModalSuccessButton = this.onModalSuccessButton.bind(this);
+        this.onDeleteCollection = this.onDeleteCollection.bind(this);
+        this.onLikeOwnCollection = this.onLikeOwnCollection.bind(this);
     }
 
     //Component mounted -> Get data
@@ -71,8 +85,9 @@ class Content extends React.Component {
 
     //Load datasets
     loadMyCollections() {
-        getAllCollections()
+        getMyCollections()
             .then((response) => {
+                console.log(response);
                 //Get the collections
                 const collections = response.data.collections;
 
@@ -84,7 +99,17 @@ class Content extends React.Component {
             .catch((error) => {
                 //Extract error mesage and status
                 const status = error.response.status;
+                console.log(error);
+
+                console.log(error.response.data);
+
                 //TODO: Error handling
+                if (status === 403) {
+                    //Unauthorized error -> Nagivate back to Login
+                    this.setState({
+                        unauthorized: true
+                    });
+                }
             });
     }
 
@@ -135,6 +160,10 @@ class Content extends React.Component {
         });
     }
 
+    onModalSuccessButton() {
+        this.closeModal();
+    }
+
     createCollection({ title, color, description }) {
         //Log
         //console.log(title, color, description);
@@ -178,6 +207,101 @@ class Content extends React.Component {
             })
     }
 
+    //Handle card like and delete
+    onDeleteCollection(id, index) {
+        //Just log
+        //console.log(id, index);
+        deleteCollection(id)
+            .then(response => {
+                //Successfully deleted card -> Remove
+                let myCollections = this.state.myCollections;
+
+                //Remove from collection
+                myCollections.splice(index, 1);
+
+                //Set state
+                this.setState({
+                    myCollections
+                });
+            })
+            .catch(error => {
+                //Get message
+                const status = error.response.status;
+
+                //Not authorized -> Expired token
+                if (status === 403) {
+                    this.setState({
+                        unauthorized: true
+                    });
+                }
+            });
+    }
+
+    onLikeOwnCollection(id, index) {
+        //Check if unlike or like
+        if (this.state.myCollections[index].liked === 0) {
+            //console.log(id, index);
+            likeCollection(id)
+                .then(response => {
+                    //Successfuly liked the collection
+                    let myCollections = this.state.myCollections;
+                    
+                    //Modify element
+                    myCollections[index] = {
+                        ...myCollections[index],
+                        likes: myCollections[index].likes + 1,
+                        liked: 1
+                    };
+
+                    //Set collection
+                    this.setState({
+                        myCollections
+                    });
+                })
+                .catch(error => {
+                    //Get message
+                    const status = error.response.status;
+
+                    //Not authorized -> Expired token
+                    if (status === 403) {
+                        this.setState({
+                            unauthorized: true
+                        });
+                    }
+                });
+        } else {
+            //console.log(id, index);
+            unlikeCollection(id)
+                .then(response => {
+                    //Successfuly liked the collection
+                    let myCollections = this.state.myCollections;
+                    
+                    //Modify element
+                    myCollections[index] = {
+                        ...myCollections[index],
+                        likes: myCollections[index].likes - 1,
+                        liked: 0
+                    };
+
+                    //Set collection
+                    this.setState({
+                        myCollections
+                    });
+                })
+                .catch(error => {
+                    //Get message
+                    const status = error.response.status;
+
+                    //Not authorized -> Expired token
+                    if (status === 403) {
+                        this.setState({
+                            unauthorized: true
+                        });
+                    }
+                });
+        }
+    }
+
     render() {
         //Get state
         const {
@@ -186,9 +310,17 @@ class Content extends React.Component {
             showCollectionModal,
             modalErrorMessage,
             modalError,
-            modalSuccess
+            modalSuccess,
+            unauthorized
         } = this.state;
+
+
         return (
+            unauthorized ? 
+            <Redirect to={{
+                pathname: '/login',
+                state: { message: 'Token expired. Please log in again' }
+            }}/> :
             <div>
                 { /* Section for tab */ }
                 <TabParent>
@@ -210,7 +342,9 @@ class Content extends React.Component {
                                         onClick={() => this.toggleModal()}/>
                                 </p>
                             }
-                            cards={myCollections}/>
+                            cards={myCollections}
+                            onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
+                            onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}/>
 
                         { /* Cards */ }
                         <FlashCards 
@@ -223,14 +357,15 @@ class Content extends React.Component {
                     </TabChild>
                 </TabParent>
 
-                { /* Section for modal */ }
+                { /* Section for create modal */ }
                 <Modal 
                     isOpen={showCollectionModal}
                     success={modalSuccess}
                     error={modalError}
                     errorMessage={modalErrorMessage}
                     onCreateCollection={this.createCollection}
-                    onClose={this.closeModal}/>
+                    onClose={this.closeModal}
+                    onSuccessButtonClicked={this.onModalSuccessButton}/>
             </div>
         )
     }

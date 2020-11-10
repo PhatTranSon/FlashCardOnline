@@ -28,7 +28,7 @@ class UserPanel extends React.Component {
         //Then redirect
         this.setState({
             loggedOut: true
-        })
+        });
     }
 
     render() {

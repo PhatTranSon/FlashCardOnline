@@ -40,7 +40,9 @@ function getAllCollections() {
     return axios({
         method: 'GET',
         url: '/collections',
-        authorization: getAccessToken()
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
     });
 }
 
@@ -49,8 +51,40 @@ function getAllCards() {
     return axios({
         method: 'GET',
         url: '/cards',
-        authorization: getAccessToken()
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
     });
+}
+
+//Get user collections
+function getMyCollections() {
+    return axios({
+        method: 'GET',
+        url: '/mine/collections',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+} 
+
+//Delete a user collection
+function deleteCollection(id) {
+    return axios({
+        method: 'DELETE',
+        url: `/collections/${id}`,
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+}
+
+function likeCollection(id) {
+    return makeRequest('/collections/likes', { collectionId: id }, 'post', true);
+}
+
+function unlikeCollection(id) {
+    return makeRequest('/collections/unlikes', { collectionId: id }, 'post', true);
 }
 
 //Create a collection
@@ -60,7 +94,14 @@ function createCollection(title, description, color) {
 }
 
 export {
+    //Collection operations
     getAllCollections,
-    getAllCards,
-    createCollection
+    getMyCollections,
+    createCollection,
+    deleteCollection,
+    likeCollection,
+    unlikeCollection,
+
+    //Card operations
+    getAllCards
 }

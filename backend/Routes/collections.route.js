@@ -15,7 +15,7 @@ module.exports = (app) => {
 
     //Like stuff
     app.post('/collections/likes', validateToken, controller.likeCollection);
-    app.delete('/collections/likes', validateToken, controller.unlikeCollection);
+    app.post('/collections/unlikes', validateToken, controller.unlikeCollection);
 
     //CRUD
     app.post('/collections', validateToken, controller.createCollection);

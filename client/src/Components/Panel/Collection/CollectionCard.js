@@ -13,15 +13,17 @@ class Card extends React.Component {
 
         //Bind methods
         this.onDelete = this.onDelete.bind(this);
-        this.onLike = this.onDelete.bind(this);
+        this.onLike = this.onLike.bind(this);
     }
 
     onDelete(id) {
         //Call parent method
-    }
+        this.props.onDelete(id);
+    }   
 
     onLike(id) {
         //Call parent method
+        this.props.onLike(id);
     }
 
     render() {

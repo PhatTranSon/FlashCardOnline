@@ -4,7 +4,7 @@
     color: #457b9d;
 }
 
-.model-success {
+.modal-success {
     text-align: center;
 }
 
@@ -12,4 +12,5 @@
     text-align: center;
     font-size: 4vh;
     color: #2a9d8f;
+    margin-bottom: 2vh;
 }
