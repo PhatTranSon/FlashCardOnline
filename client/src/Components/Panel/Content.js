@@ -19,7 +19,11 @@ import {
     unlikeCollection,
 
     //Card operations
-    getAllCards
+    getAllCards,
+    likeCard,
+    unlikeCard,
+    getLikedCollections,
+    deleteCard
 } from '../../Common/Operations';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -66,6 +70,8 @@ class Content extends React.Component {
         this.onModalSuccessButton = this.onModalSuccessButton.bind(this);
         this.onDeleteCollection = this.onDeleteCollection.bind(this);
         this.onLikeOwnCollection = this.onLikeOwnCollection.bind(this);
+        this.onLikeOwnCard = this.onLikeOwnCard.bind(this);
+        this.unlikeLikedCollection = this.unlikeLikedCollection.bind(this);
     }
 
     //Component mounted -> Get data
@@ -127,6 +133,7 @@ class Content extends React.Component {
             .catch((error) => {
                 //Extract error mesage and status
                 const status = error.response.status;
+
                 //TODO: Error handling
             });
     }
@@ -140,7 +147,22 @@ class Content extends React.Component {
     }
 
     loadLikedCollections() {
+        getLikedCollections()
+            .then(response => {
+                //Get the collections 
+                const collections = response.data.collections;
 
+                //Set state
+                this.setState({
+                    likedCollections: collections
+                });
+            })
+            .catch(error => {
+                //Extract error mesage and status
+                const status = error.response.status;
+                
+                //TODO: Error handling
+            });
     }
 
     loadLikedCards() {
@@ -253,9 +275,15 @@ class Content extends React.Component {
                         liked: 1
                     };
 
+                    //Add liked collection to liked collections
+                    let likedCollections = this.state.likedCollections;
+                    let collectionIndex = myCollections.findIndex(item => item.id === id);
+                    likedCollections = [...likedCollections, myCollections[collectionIndex]];
+
                     //Set collection
                     this.setState({
-                        myCollections
+                        myCollections,
+                        likedCollections
                     });
                 })
                 .catch(error => {
@@ -283,9 +311,15 @@ class Content extends React.Component {
                         liked: 0
                     };
 
+                    //Remove from likedCollection
+                    let likedCollections = this.state.likedCollections;
+                    let collectionIndex = likedCollections.findIndex(item => item.id === id);
+                    likedCollections.splice(collectionIndex, 1);
+
                     //Set collection
                     this.setState({
-                        myCollections
+                        myCollections,
+                        likedCollections
                     });
                 })
                 .catch(error => {
@@ -302,11 +336,130 @@ class Content extends React.Component {
         }
     }
 
+    onDeleteCard(id, index) {
+        deleteCard(id)
+            .then(response => {
+                //Successfully deleted card
+                let myCards = this.state.myCards;
+
+                //Remove card from array
+                myCards.splice(index, 1);
+
+                //Set cards
+                this.setState({
+                    myCards
+                });
+            })
+            .catch(error => {
+                //Get message
+                const status = error.response.status;
+
+                //Not authorized -> Expired token
+                if (status === 403) {
+                    this.setState({
+                        unauthorized: true
+                    });
+                }
+            });
+    }
+
+    onLikeOwnCard(id, index) {
+        if (this.state.myCards[index].liked === 0) {
+            likeCard(id)
+                .then(response => {
+                    //Successfully liked card
+                    let myCards = this.state.myCards;
+
+                    //Modify my cards
+                    myCards[index] = {
+                        ...myCards[index],
+                        liked: 1,
+                        likes: myCards[index].likes + 1
+                    }
+
+                    //Set state
+                    this.setState({
+                        myCards
+                    });
+                })
+                .catch(error => {
+                    //Get message
+                    const status = error.response.status;
+
+                    //Not authorized -> Expired token
+                    if (status === 403) {
+                        this.setState({
+                            unauthorized: true
+                        });
+                    }
+                });
+        } else {
+            unlikeCard(id)
+                .then(response => {
+                    //Successfully liked card
+                    let myCards = this.state.myCards;
+
+                    //Modify my cards
+                    myCards[index] = {
+                        ...myCards[index],
+                        liked: 0,
+                        likes: myCards[index].likes - 1
+                    }
+
+                    //Set state
+                    this.setState({
+                        myCards
+                    });
+                })
+                .catch(error => {
+                    //Get message
+                    const status = error.response.status;
+
+                    //Not authorized -> Expired token
+                    if (status === 403) {
+                        this.setState({
+                            unauthorized: true
+                        });
+                    }
+                });
+        }
+    }  
+
+    //Dislike liked collection
+    unlikeLikedCollection(id, index) {
+        unlikeCollection(id)
+            .then(response => {
+                //Remove from liked collections
+                let likedCollections = this.state.likedCollections;
+                likedCollections.splice(index, 1);
+
+                //Set state
+                this.setState({
+                    likedCollections
+                });
+
+                //Reload my collections
+                this.loadMyCollections();
+            })
+            .catch(error => {
+                //Get message
+                const status = error.response.status;
+
+                //Not authorized -> Expired token
+                if (status === 403) {
+                    this.setState({
+                        unauthorized: true
+                    });
+                }
+            });
+    }
+
     render() {
         //Get state
         const {
             myCollections,
             myCards,
+            likedCollections,
             showCollectionModal,
             modalErrorMessage,
             modalError,
@@ -321,7 +474,7 @@ class Content extends React.Component {
                 pathname: '/login',
                 state: { message: 'Token expired. Please log in again' }
             }}/> :
-            <div>
+            <div className="content-box">
                 { /* Section for tab */ }
                 <TabParent>
                     <TabChild name="Hot">
@@ -344,16 +497,26 @@ class Content extends React.Component {
                             }
                             cards={myCollections}
                             onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
-                            onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}/>
+                            onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}
+                            showDelete={true}/>
 
                         { /* Cards */ }
                         <FlashCards 
                             title={"Your cards"}
-                            cards={myCards}/>
+                            showDelete={false}
+                            cards={myCards}
+                            showDelete={true}
+                            onLikeCard={(id, index) => this.onLikeOwnCard(id, index)}
+                            onDeleteCard={(id, index) => this.onDeleteCard(id, index)}/>
                     </TabChild>
 
                     <TabChild name="Liked">
-                        3
+                        { /* Collections with no add icon */ }
+                        <CollectionCards 
+                            title="Like collections"
+                            cards={likedCollections}
+                            onLikeCollection={(id, index) => this.unlikeLikedCollection(id, index)}
+                            showDelete={false}/>
                     </TabChild>
                 </TabParent>
 

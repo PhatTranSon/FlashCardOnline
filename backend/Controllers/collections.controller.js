@@ -301,13 +301,21 @@ exports.getLikedCollections = (req, resp) => {
                 ],
                 attributes: {
                     include: [
-                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
                     ]
                 },
                 group: ['collection.id']
             }
         )
         .then(collections => {
+            //Map
+            collections = collections.map(collection => {
+                return {
+                    ...collection.dataValues,
+                    liked: 1
+                }
+            });
+
             //Serve result
             resp.json({
                 collections

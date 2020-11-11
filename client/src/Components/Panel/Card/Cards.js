@@ -12,19 +12,19 @@ class CardPanel extends React.Component {
         this.onLike = this.onLike.bind(this);
     }
 
-    onDelete(id) {
+    onDelete(id, index) {
         //Test
-        console.log(id);
+        this.props.onDeleteCard(id, index);
     }
 
-    onLike(id) {
+    onLike(id, index) {
         //Test
-        console.log(id);
+        this.props.onLikeCard(id, index);
     }
 
     render() {
         //Get the cards from props
-        const { cards, title } = this.props
+        const { cards, title, showDelete } = this.props
 
         return (
             <div>
@@ -34,10 +34,11 @@ class CardPanel extends React.Component {
                     cards.map((card, index) => {
                         return (
                             <Card 
+                                showDelete={showDelete}
                                 key={index}
                                 {...card}
-                                onDelete={id => this.onDelete(id)}
-                                onLike={id => this.onLike(id)}/>
+                                onDelete={id => this.onDelete(id, index)}
+                                onLike={id => this.onLike(id, index)}/>
                         )
                     })
                 }

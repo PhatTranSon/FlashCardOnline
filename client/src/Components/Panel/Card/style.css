@@ -13,7 +13,7 @@
 
 .flashcard {
     height: 40vh;
-    padding: 2vh;
+    padding: 3vh;
     position: relative;
     border-radius: 2vh;
     color: white;
@@ -29,5 +29,5 @@
 }
 
 .flashcard-description {
-    font-size: 2vh;
+    font-size: 2.5vh;
 }

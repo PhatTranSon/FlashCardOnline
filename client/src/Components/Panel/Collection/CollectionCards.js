@@ -21,7 +21,7 @@ class CollectionCardPanel extends React.Component {
 
     render() {
         //Get the card data from props
-        const { cards, title } = this.props;
+        const { cards, title, showDelete } = this.props;
 
         //Render cards
         return (
@@ -32,6 +32,7 @@ class CollectionCardPanel extends React.Component {
                         cards.map((card, index) => {
                             return ( 
                                 <Card 
+                                    showDelete={showDelete}
                                     key={index}
                                     onLike={(id) => this.onLikeCollection(id, index)}
                                     onDelete={(id) => this.onDeleteCollection(id, index)}

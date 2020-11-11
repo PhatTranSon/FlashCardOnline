@@ -28,7 +28,7 @@ class Card extends React.Component {
 
     render() {
         //Get the name, description and like
-        const { id, title, description, likes, liked, color } = this.props;
+        const { id, title, description, likes, liked, color, showDelete } = this.props;
 
         //Render components
         return (
@@ -50,7 +50,7 @@ class Card extends React.Component {
                 </p>
 
                 <Like 
-                    showDelete={true} 
+                    showDelete={showDelete} 
                     liked={liked} 
                     likes={likes}
                     onDelete={() => this.onDelete(id)}

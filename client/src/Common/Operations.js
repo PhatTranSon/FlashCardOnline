@@ -46,22 +46,22 @@ function getAllCollections() {
     });
 }
 
-//Get all cards
-function getAllCards() {
-    return axios({
-        method: 'GET',
-        url: '/cards',
-        headers: {
-            'Authorization': `Bearer ${getAccessToken()}`
-        }
-    });
-}
-
 //Get user collections
 function getMyCollections() {
     return axios({
         method: 'GET',
         url: '/mine/collections',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+} 
+
+//Get liked collections
+function getLikedCollections() {
+    return axios({
+        method: 'GET',
+        url: '/mine/collections/liked',
         headers: {
             'Authorization': `Bearer ${getAccessToken()}`
         }
@@ -79,6 +79,7 @@ function deleteCollection(id) {
     });
 }
 
+//Like and Unlike collection
 function likeCollection(id) {
     return makeRequest('/collections/likes', { collectionId: id }, 'post', true);
 }
@@ -93,6 +94,31 @@ function createCollection(title, description, color) {
     return makeRequest('/collections', { title, description, color }, 'post', true);
 }
 
+//Get all cards
+function getAllCards() {
+    return axios({
+        method: 'GET',
+        url: '/cards',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+}
+
+//Delete card
+function deleteCard(id) {
+    return makeRequest('/cards/delete', { id }, 'post', true);
+}
+
+//Like and Unlike card
+function likeCard(id) {
+    return makeRequest('/cards/likes', { cardId: id }, 'post', true);
+}
+
+function unlikeCard(id) {
+    return makeRequest('/cards/unlikes', { cardId: id }, 'post', true);
+}
+
 export {
     //Collection operations
     getAllCollections,
@@ -101,7 +127,11 @@ export {
     deleteCollection,
     likeCollection,
     unlikeCollection,
+    getLikedCollections,
 
     //Card operations
-    getAllCards
+    getAllCards,
+    likeCard,
+    unlikeCard,
+    deleteCard
 }

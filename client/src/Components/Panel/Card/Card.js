@@ -23,7 +23,7 @@ class Card extends React.Component {
 
     render() {
         //Get the data
-        const { id, title, phonetic, description, liked, likes, color } = this.props;
+        const { id, title, phonetic, description, liked, likes, color, showDelete } = this.props;
 
         return (
             <div 
@@ -34,7 +34,7 @@ class Card extends React.Component {
                 <p className="flashcard-description">{ description }</p>
 
                 <Like 
-                    showDelete={true}
+                    showDelete={showDelete}
                     likes={likes}
                     liked={liked}
                     onDelete={() => this.onDelete(id)}
