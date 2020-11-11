@@ -319,6 +319,15 @@ exports.viewAllLikedCards = (req, resp) => {
     //Get cards and respond
     cardsLikesCounted
         .then(cards => {
+            //Map
+            cards = cards.map(card => {
+                return {
+                    ...card.dataValues,
+                    liked: 1
+                }
+            })
+
+            //Respond
             resp.json({
                 cards
             });
@@ -330,7 +339,6 @@ exports.viewAllLikedCards = (req, resp) => {
             resp.status(500).json({
                 message: "Error getting cards"
             });
-            resp.end();
         });
 }
 
@@ -434,7 +442,7 @@ exports.createNewCard = (req, resp) => {
                         //Response
                         resp.json({
                             message: "Successfully created card",
-                            id: card.title,
+                            id: card.id,
                             title: card.title,
                             phonetic: card.phonetic,
                             description: card.description,
