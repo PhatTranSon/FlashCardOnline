@@ -9,6 +9,7 @@ class CollectionCardPanel extends React.Component {
 
         this.onDeleteCollection = this.onDeleteCollection.bind(this);
         this.onLikeCollection = this.onLikeCollection.bind(this);
+        this.onClickCollection = this.onClickCollection.bind(this);
     }
 
     onDeleteCollection(id, index) {
@@ -17,6 +18,10 @@ class CollectionCardPanel extends React.Component {
 
     onLikeCollection(id, index) {
         this.props.onLikeCollection(id, index);
+    }
+
+    onClickCollection(id) {
+        this.props.onClickCollection(id);
     }
 
     render() {
@@ -36,6 +41,7 @@ class CollectionCardPanel extends React.Component {
                                     key={index}
                                     onLike={(id) => this.onLikeCollection(id, index)}
                                     onDelete={(id) => this.onDeleteCollection(id, index)}
+                                    onCardClick={(id) => this.onClickCollection(id)}
                                     {...card}/>
                             );
                         })

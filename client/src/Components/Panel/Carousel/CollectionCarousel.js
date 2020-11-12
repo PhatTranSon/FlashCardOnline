@@ -26,6 +26,10 @@ class CollectionCarousel extends React.Component {
         //Call parent passed method
         this.props.onCollectionLike(id, index);
     }
+
+    onCollectionClick(id) {
+        this.props.onCollectionClick(id);
+    }
     
     render() {
         //Get the collections
@@ -42,6 +46,7 @@ class CollectionCarousel extends React.Component {
                                 {...collection}
                                 showDelete={false}
                                 onLike={id => this.onCollectionLike(id, index)}
+                                onCardClick={id => this.onCollectionClick(id)}
                                 inverted={true}
                                 key={index}/>
                         )

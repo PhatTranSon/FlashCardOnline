@@ -80,6 +80,7 @@ class Content extends React.Component {
         this.unlikeLikedCard = this.unlikeLikedCard.bind(this);
         this.onHotCollectionLiked = this.onHotCollectionLiked.bind(this);
         this.onHotCardLiked = this.onHotCardLiked.bind(this);
+        this.onCollectionCliked = this.onCollectionCliked.bind(this);
     }
 
     //Component mounted -> Get data
@@ -710,6 +711,10 @@ class Content extends React.Component {
         }
     }
 
+    onCollectionCliked(id) {
+        console.log(id);
+    }
+
     render() {
         //Get state
         const {
@@ -740,6 +745,7 @@ class Content extends React.Component {
                         <CollectionCarousel 
                             collections={hotCollections}
                             onCollectionLike={(id, index) => this.onHotCollectionLiked(id, index)}
+                            onCollectionClick={(id) => this.onCollectionCliked(id)}
                             title="Hot collections"/>
 
                         <CardCarousel
@@ -765,6 +771,7 @@ class Content extends React.Component {
                             cards={myCollections}
                             onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
                             onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}
+                            onClickCollection={(id) => this.onCollectionCliked(id)}
                             showDelete={true}/>
 
                         { /* Cards */ }
@@ -783,6 +790,7 @@ class Content extends React.Component {
                             title="Like collections"
                             cards={likedCollections}
                             onLikeCollection={(id, index) => this.unlikeLikedCollection(id, index)}
+                            onClickCollection={(id) => this.onCollectionCliked(id)}
                             showDelete={false}/>
 
                         { /* Cards */ }

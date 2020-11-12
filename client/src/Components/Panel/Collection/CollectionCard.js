@@ -14,6 +14,7 @@ class Card extends React.Component {
         //Bind methods
         this.onDelete = this.onDelete.bind(this);
         this.onLike = this.onLike.bind(this);
+        this.onClick = this.onClick.bind(this);
     }
 
     onDelete(id) {
@@ -26,6 +27,13 @@ class Card extends React.Component {
         this.props.onLike(id);
     }
 
+    onClick(id) {
+        //Call parent method
+        if (this.props.onCardClick) {
+            this.props.onCardClick(id);
+        }
+    }
+
     render() {
         //Get the name, description and like
         const { id, title, description, likes, liked, color, showDelete } = this.props;
@@ -35,9 +43,8 @@ class Card extends React.Component {
         return (
             <div 
                 className="card collection-card" 
-                style={
-                    inverted ? { background: formatColor(color) } : null
-                }>
+                style={ inverted ? { background: formatColor(color) } : null}
+                onClick={() => this.onClick(id)}>
                 <p 
                     className="collection-card-title"
                     style={

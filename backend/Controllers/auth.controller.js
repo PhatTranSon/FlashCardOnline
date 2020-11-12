@@ -55,6 +55,7 @@ exports.createAccount = async (req, resp) => {
             //Display 
             resp.json({
                 message: "Account created successfully",
+                id: data.id,
                 username: name,
                 password: password,
                 accessToken: accessToken
@@ -107,6 +108,7 @@ exports.validateAccount = async (req, resp) => {
 
                 //Give back to user
                 resp.json({
+                    id: user.id,
                     message: "Successfully logged in",
                     accessToken
                 });

@@ -30,9 +30,11 @@ exports.signup = (name, password)  => {
             .then(response => {
                 //Get the access token
                 const token = response.data.accessToken;
+                const id = response.data.id
 
                 //Set token therefore log in
                 setAccessToken(token);
+                setUserId(id);
 
                 //Return the response again
                 return response
@@ -44,9 +46,11 @@ exports.login = (name, password) => {
             .then(response => {
                 //Get the access token
                 const token = response.data.accessToken;
+                const id = response.data.id
 
                 //Set token therefore log in
                 setAccessToken(token);
+                setUserId(id);
 
                 //Return the response
                 return response;
@@ -57,12 +61,17 @@ function setAccessToken(accessToken) {
     localStorage.setItem("accessToken", accessToken);
 }
 
+function setUserId(id) {
+    localStorage.setItem("userId", id);
+}
+
 exports.isLoggedIn = () => {
     return !(localStorage.getItem("accessToken") === null);
 }
 
 exports.logout = () => {
-    return localStorage.removeItem("accessToken");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("userId");
 }
 
 exports.getAccessToken = () => {
