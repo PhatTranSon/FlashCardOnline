@@ -364,11 +364,104 @@ exports.viewAllCardsFromUser = (req, resp) => {
     //Get user id
     const userId = req.user.id;
 
-    //Placeholder
-    resp.json({
-        cards: []
+    //Get the cards with user id
+    let cardsLikesCounted = Card
+        .findAll(
+            {
+                where: {
+                    userId
+                },
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        attributes: [],
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                order: sequelize.literal("likes DESC"),
+                group: ['card.id']
+            }
+        );
+
+    let cardsLikeChecked = Card
+        .findAll(
+            {
+                where: {
+                    userId
+                },
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [],
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                    ]
+                },
+                group: ['card.id']
+            }
+        );
+
+    Promise.all([cardsLikeChecked, cardsLikesCounted])
+        .then(response => {
+            //Expand
+            const [checkLiked, countLikes] = response;
+
+            //Combine the data
+            const results = [];
+
+            //Aggregate data
+            //Merge objects from 2 arrays
+            countLikes.forEach((countedLikesRow, index) => {
+                //Find index
+                let matchedIndex = checkLiked.findIndex(item => item.dataValues.id === countedLikesRow.dataValues.id);
+
+                //Get the count like row
+                let checkedLikeRow = checkLiked[matchedIndex];
+
+                //Create new object and add to result
+                results.push(
+                    {
+                        id: checkedLikeRow.dataValues.id,
+                        title: checkedLikeRow.dataValues.title,
+                        phonetic: checkedLikeRow.dataValues.phonetic,
+                        description: checkedLikeRow.dataValues.description,
+                        createdAt: checkedLikeRow.dataValues.createdAt,
+                        updatedAt: checkedLikeRow.dataValues.updatedAt,
+                        liked: checkedLikeRow.dataValues.liked,
+                        likes: countedLikesRow.dataValues.likes,
+                        color: checkedLikeRow.dataValues.color
+                    }
+                );
+            });
+
+            //Respond with data
+            resp.json({
+                cards: results
+            });
+            resp.end();
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+            resp.status(500).json({
+                message: "Error getting cards"
+            });
+            resp.end();
     });
-    resp.end();
 }
 
 //Helper function to extract validation error
