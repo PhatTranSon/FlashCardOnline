@@ -34,6 +34,7 @@ class Like extends React.Component {
     render() {
         //Display if show delete button or not
         const { showDelete, liked, likes } = this.props;
+        const inverted = this.props.inverted || false;
 
         //Render 
         return (
@@ -61,7 +62,7 @@ class Like extends React.Component {
                         className="red-icon"
                         onClick={() => this.onLikeClicked()}/>
                 }
-                <span>{likes}</span>
+                <span style={ inverted ? { color: 'white' }: null}>{likes}</span>
             </div>
         )
     }

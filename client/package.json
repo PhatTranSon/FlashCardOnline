@@ -22,6 +22,7 @@
     "react-modal": "^3.11.2",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
+    "react-slick": "^0.27.13",
     "web-vitals": "^0.2.4"
   },
   "scripts": {

@@ -29,27 +29,41 @@ class Card extends React.Component {
     render() {
         //Get the name, description and like
         const { id, title, description, likes, liked, color, showDelete } = this.props;
+        const inverted = this.props.inverted || false;
 
         //Render components
         return (
-            <div className="card collection-card" >
+            <div 
+                className="card collection-card" 
+                style={
+                    inverted ? { background: formatColor(color) } : null
+                }>
                 <p 
                     className="collection-card-title"
-                    style={{
-                        color: formatColor(color),
-                        borderBottom: `3px solid ${formatColor(color)}`
-                    }}>
+                    style={
+                        inverted ? 
+                        {
+                            color: 'white',
+                            borderBottom: `3px solid white`
+                        } :
+                        {
+                            color: formatColor(color),
+                            borderBottom: `3px solid ${formatColor(color)}`
+                        }
+                    }>
                     { title }
                 </p>
 
                 <p 
                     className="collection-card-content"
-                    style={{color: formatColor(color)}}
-                    >
+                    style={
+                        inverted ? { color: 'white' } : { color: formatColor(color) }
+                    }>
                     { description }
                 </p>
 
                 <Like 
+                    inverted={inverted}
                     showDelete={showDelete} 
                     liked={liked} 
                     likes={likes}

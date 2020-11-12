@@ -9,6 +9,9 @@ import FlashCards from './Card/Cards';
 
 import Modal from './Modal/CreateCollectionModal';
 
+import CollectionCarousel from './Carousel/CollectionCarousel';
+import CardCarousel from './Carousel/CardCarousel';
+
 import {
     //Collection operations
     getAllCollections,
@@ -537,7 +540,13 @@ class Content extends React.Component {
                 { /* Section for tab */ }
                 <TabParent>
                     <TabChild name="Hot">
-                        1
+                        <CollectionCarousel 
+                            collections={myCollections}
+                            title="Hot collections"/>
+
+                        <CardCarousel
+                            cards={myCards}
+                            title="Hot flashcards"/>
                     </TabChild>
 
                     <TabChild name="Mine">

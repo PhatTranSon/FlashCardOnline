@@ -38,3 +38,19 @@ body, html {
 .red-icon {
     color: #e63946;
 }
+
+/* Slider */
+
+.slick-prev {
+    left: 3% !important;
+    z-index: 1;
+}
+
+.slick-next {
+    right: 3% !important;
+    z-index: 1;
+}
+
+.slick-slide {
+    margin-left: 20px;
+}
