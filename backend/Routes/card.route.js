@@ -12,7 +12,7 @@ module.exports = (app) => {
     app.get('/mine/cards', validateToken, controller.viewAllCardsFromUser);
 
     //View all cards from collection
-    app.get('/cardsfromcollection', getUser, controller.viewAllCardsFromCollections);
+    app.post('/cardsfromcollection', getUser, controller.viewAllCardsFromCollections);
 
     //View all liked cards
     app.get('/mine/cards/liked', validateToken, controller.viewAllLikedCards);

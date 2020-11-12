@@ -46,6 +46,17 @@ function getAllCollections() {
     });
 }
 
+//Get one card with id
+function getOneCollection(id) {
+    return axios({
+        method: 'GET',
+        url: `/collections/${id}`,
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+}
+
 //Get user collections
 function getMyCollections() {
     return axios({
@@ -127,6 +138,11 @@ function getMyCards() {
     });
 }
 
+//Get all cards from collection
+function getCardsFromCollection(id) {
+    return makeRequest('/cardsfromcollection', { collectionId: id }, 'post', true);
+}
+
 //Delete card
 function deleteCard(id) {
     return makeRequest('/cards/delete', { id }, 'post', true);
@@ -144,6 +160,7 @@ function unlikeCard(id) {
 export {
     //Collection operations
     getAllCollections,
+    getOneCollection,
     getMyCollections,
     createCollection,
     deleteCollection,
@@ -153,6 +170,7 @@ export {
 
     //Card operations
     getAllCards,
+    getCardsFromCollection,
     getMyCards,
     getLikedCards,
     likeCard,

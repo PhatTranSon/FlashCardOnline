@@ -102,6 +102,7 @@ function viewAllCardsFromCollectionLoggedIn(req, resp) {
                         title: checkedLikeRow.dataValues.title,
                         phonetic: checkedLikeRow.dataValues.phonetic,
                         description: checkedLikeRow.dataValues.description,
+                        color: checkedLikeRow.dataValues.color,
                         createdAt: checkedLikeRow.dataValues.createdAt,
                         updatedAt: checkedLikeRow.dataValues.updatedAt,
                         liked: checkedLikeRow.dataValues.liked,

@@ -154,7 +154,7 @@ exports.getOneCollection = (req, resp) => {
                 color: collectionWithLiked.dataValues.color,
                 liked: collectionWithLiked.dataValues.liked,
                 likes: collectionWithLikes.dataValues.likes,
-                cards: collectionWithLiked.dataValues.cards
+                description: collectionWithLikes.dataValues.description
             }
 
             //Respond

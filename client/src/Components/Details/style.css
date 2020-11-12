@@ -1,0 +1,16 @@
+.collection-details-panel {
+    width: 60%;
+    margin: 0 auto;
+}
+
+.collection-details-title {
+    font-size: 6vh;
+    font-weight: 500;
+    margin-bottom: 3vh;
+    display: inline-block;
+}
+
+.collection-details-description {
+    font-size: 4vh;
+    font-weight: 400;
+}

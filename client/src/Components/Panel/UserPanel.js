@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from './LogOutNavbar';
+import Navbar from '../Common/LogOutNavbar';
 import Content from './Content';
 
 import {

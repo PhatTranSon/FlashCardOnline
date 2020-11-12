@@ -15,6 +15,7 @@ import PrivateRoute from './Common/ProtectedRoute';
 import Signup from './Components/Authentication/Signup';
 import Login from './Components/Authentication/Login';
 import UserPanel from './Components/Panel/UserPanel';
+import CollectionDetails from './Components/Details/CollectionDetails';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <div className="App">
         <Switch>
           <Route exact path="/"></Route>
+          <Route path="/collections/:collectionId" component={CollectionDetails}/>
           <Route path="/signup" render={(props) => <Signup {...props}/>}/>
           <Route path="/login" render={(props) => <Login {...props}/>}/>
           <PrivateRoute path="/panel" component={UserPanel}/>
