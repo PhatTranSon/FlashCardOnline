@@ -305,11 +305,6 @@ exports.getLikedCollections = (req, resp) => {
                         required: true //Inner join -> Get only the collections user liked
                     }
                 ],
-                attributes: {
-                    include: [
-                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
-                    ]
-                },
                 group: ['collection.id']
             }
         )

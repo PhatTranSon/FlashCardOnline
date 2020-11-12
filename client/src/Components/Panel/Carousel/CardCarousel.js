@@ -20,6 +20,12 @@ class CardCarousel extends React.Component {
             autoplaySpeed: 2000,
             adaptiveHeight: true
         };
+
+        this.onCardLike = this.onCardLike.bind(this);
+    }
+
+    onCardLike(id, index) {
+        this.props.onCardLike(id, index);
     }
 
     render() {
@@ -34,6 +40,7 @@ class CardCarousel extends React.Component {
                         return (
                             <Card 
                                 {...card}
+                                onLike={id => this.onCardLike(id, index)}
                                 showDelete={false}
                                 key={index}/>
                         )

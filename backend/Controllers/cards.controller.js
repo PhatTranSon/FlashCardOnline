@@ -314,11 +314,6 @@ exports.viewAllLikedCards = (req, resp) => {
                         required: true
                     }
                 ],
-                attributes: {
-                    include: [
-                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
-                    ]
-                },
                 group: ['card.id']
             }
         );
