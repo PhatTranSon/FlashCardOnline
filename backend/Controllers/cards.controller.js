@@ -379,7 +379,7 @@ exports.viewAllCardsFromUser = (req, resp) => {
                     include: [
                         [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
                     ]
-                }
+                },
                 group: ['card.id']
             }
         );

@@ -23,6 +23,7 @@ import {
 
     //Card operations
     getAllCards,
+    getMyCards,
     likeCard,
     unlikeCard,
     getLikedCollections,
@@ -110,9 +111,9 @@ class Content extends React.Component {
             .catch((error) => {
                 //Extract error mesage and status
                 const status = error.response.status;
-                console.log(error);
+                //console.log(error);
 
-                console.log(error.response.data);
+                //console.log(error.response.data);
 
                 //TODO: Error handling
                 if (status === 403) {
@@ -125,7 +126,7 @@ class Content extends React.Component {
     }
 
     loadMyCards() {
-        getAllCards()
+        getMyCards()
             .then((response) => {
                 //Get the cards
                 const cards = response.data.cards;
@@ -144,11 +145,42 @@ class Content extends React.Component {
     }
 
     loadHotCollections() {
+        //Get all collections sorted by likes
+        getAllCollections()
+            .then(response => {
+                //Successfully retrieved the collections -> Display
+                const collections = response.data.collections;
 
+                //Set state
+                this.setState({
+                    hotCollections: collections
+                });
+            })
+            .catch(error => {
+                //Extract error mesage and status
+                const status = error.response.status;
+                //TODO: Error handling
+            });
     }
 
     loadHotCards() {
+        //Get all cards sorted by likes
+        getAllCards()
+            .then((response) => {
+                //Get the cards
+                const cards = response.data.cards;
 
+                //Set state
+                this.setState({
+                    hotCards: cards
+                })
+            })
+            .catch((error) => {
+                //Extract error mesage and status
+                const status = error.response.status;
+
+                //TODO: Error handling
+            });
     }
 
     loadLikedCollections() {
@@ -520,6 +552,8 @@ class Content extends React.Component {
         const {
             myCollections,
             myCards,
+            hotCollections,
+            hotCards,
             likedCards,
             likedCollections,
             showCollectionModal,
@@ -541,11 +575,11 @@ class Content extends React.Component {
                 <TabParent>
                     <TabChild name="Hot">
                         <CollectionCarousel 
-                            collections={myCollections}
+                            collections={hotCollections}
                             title="Hot collections"/>
 
                         <CardCarousel
-                            cards={myCards}
+                            cards={hotCards}
                             title="Hot flashcards"/>
                     </TabChild>
 

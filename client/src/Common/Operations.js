@@ -116,6 +116,17 @@ function getLikedCards() {
     });
 }
 
+//Get my cards
+function getMyCards() {
+    return axios({
+        method: 'GET',
+        url: '/mine/cards/',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+}
+
 //Delete card
 function deleteCard(id) {
     return makeRequest('/cards/delete', { id }, 'post', true);
@@ -142,6 +153,7 @@ export {
 
     //Card operations
     getAllCards,
+    getMyCards,
     getLikedCards,
     likeCard,
     unlikeCard,
