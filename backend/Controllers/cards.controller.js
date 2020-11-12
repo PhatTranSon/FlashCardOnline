@@ -1,4 +1,5 @@
 //Import database
+const { response } = require('express');
 const database = require('../Models/');
 const Card = database.Card;
 const Collection = database.Collection;
@@ -356,50 +357,18 @@ exports.viewAllCardsFromCollections = (req, resp) => {
     }
 }
 
+//Helper function to retrieve cards that belongs to a user
+
 exports.viewAllCardsFromUser = (req, resp) => {
+    //This is fundamentally wrong
     //Get user id
     const userId = req.user.id;
 
-    //Get cards
-    let cardsLikesCounted = Card
-        .findAll(
-            {
-                include: [
-                    {
-                        //Check if user liked or not
-                        model: User,
-                        attributes: [],
-                        where: {
-                            id: userId
-                        },
-                        required: true
-                    }
-                ],
-                attributes: {
-                    include: [
-                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
-                    ]
-                },
-                group: ['card.id']
-            }
-        );
-
-    //Repond
-    cardsLikesCounted
-        .then(cards => {
-            resp.json({
-                cards
-            });
-            resp.send();
-        })
-        .catch(error => {
-            //Debug
-            console.log(error);
-            resp.status(500).json({
-                message: "Error getting cards"
-            });
-            resp.end();
-        });
+    //Placeholder
+    resp.json({
+        cards: []
+    });
+    resp.end();
 }
 
 //Helper function to extract validation error
@@ -421,6 +390,9 @@ function extractCardValidationMessage(e) {
 }
 
 exports.createNewCard = (req, resp) => {
+    //Get user id
+    const userId = req.user.id;
+
     //Get the collection id
     const { collectionId, title, phonetic, description, color } = req.body;
 
@@ -433,14 +405,15 @@ exports.createNewCard = (req, resp) => {
         })
         .then(collection => {
             //Check the user id
-            if (collection.userId === req.user.id) {
+            if (collection.userId === userId) {
                 //Create new card
                 const data = {
                     collectionId,
                     title, 
                     phonetic, 
                     description,
-                    color
+                    color,
+                    userId
                 };
 
                 Card.create(data)
@@ -506,67 +479,51 @@ exports.updateCard = (req, resp) => {
             }
         })
         .then(card => {
-            //Get the card collection
-            Collection
-                .findOne({
-                    where: {
-                        id: card.collectionId
-                    }
-                })
-                .then(collection => {
-                    if (collection.userId === req.user.id) {
-                        //Update
-                        card.title = title;
-                        card.phonetic = phonetic;
-                        card.description = description;
-                        card.color = color;
+            if (card.userId === req.user.id) {
+                //Update
+                card.title = title;
+                card.phonetic = phonetic;
+                card.description = description;
+                card.color = color;
 
-                        //Save
-                        card.save()
-                            .then(newCard => {
-                                resp.json({
-                                    message: "Successfully updated card",
-                                    title: newCard.title,
-                                    phonetic: newCard.phonetic,
-                                    description: newCard.description,
-                                    color: newCard.color
-                                });
-                                resp.end();
-                            })
-                            .catch(error => {
-                                //Check validation error
-                                if (error instanceof ValidationError) {
-                                    //Extract message
-                                    const message = extractCardValidationMessage(error);
-                                    
-                                    //Respond
-                                    resp.status(500).json({
-                                        message
-                                    });
-                                    resp.end();
-                                } else {
-                                    //Debug
-                                    console.log(error);
-                                    resp.status(500).json({
-                                        message: "Error creating collection"
-                                    });
-                                    resp.end();
-                                }
-                            });
-                    } else {
-                        resp.status(403).json({
-                            message: "Unauthorized"
+                //Save
+                card.save()
+                    .then(newCard => {
+                        resp.json({
+                            message: "Successfully updated card",
+                            title: newCard.title,
+                            phonetic: newCard.phonetic,
+                            description: newCard.description,
+                            color: newCard.color
                         });
                         resp.end();
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                    resp.status(500).json({
-                        message: "Error creating card"
+                    })
+                    .catch(error => {
+                        //Check validation error
+                        if (error instanceof ValidationError) {
+                            //Extract message
+                            const message = extractCardValidationMessage(error);
+                            
+                            //Respond
+                            resp.status(500).json({
+                                message
+                            });
+                            resp.end();
+                        } else {
+                            //Debug
+                            console.log(error);
+                            resp.status(500).json({
+                                message: "Error creating collection"
+                            });
+                            resp.end();
+                        }
                     });
-                    resp.end();
+            } else {
+                resp.status(403).json({
+                    message: "Unauthorized"
                 });
+                resp.end();
+            }
         })
         .catch(error => {
             console.log(error);
@@ -589,44 +546,28 @@ exports.deleteCard = (req, resp) => {
             }
         })
         .then(card => {
-            //Get the card collection
-            Collection
-                .findOne({
-                    where: {
-                        id: card.collectionId
-                    }
-                })
-                .then(collection => {
-                    if (collection.userId === req.user.id) {
-                        //Delete card
-                        card.destroy()
-                            .then(data => {
-                                resp.json({
-                                    message: "Successfully deleted card"
-                                });
-                                resp.end();
-                            })
-                            .catch(error => {
-                                console.log(error);
-                                resp.status(500).json({
-                                    message: "Error deleting card"
-                                });
-                                resp.end();
-                            });
-                    } else {
-                        resp.status(403).json({
-                            message: "Unauthorized"
+            if (card.userId === req.user.id) {
+                //Delete card
+                card.destroy()
+                    .then(data => {
+                        resp.json({
+                            message: "Successfully deleted card"
                         });
                         resp.end();
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                    resp.status(500).json({
-                        message: "Error deleting card"
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        resp.status(500).json({
+                            message: "Error deleting card"
+                        });
+                        resp.end();
                     });
-                    resp.end();
+            } else {
+                resp.status(403).json({
+                    message: "Unauthorized"
                 });
+                resp.end();
+            }
         })
         .catch(error => {
             console.log(error);

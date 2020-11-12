@@ -41,6 +41,16 @@ database.Collection.belongsTo(database.User, {
     as: "user"
 });
 
+//Create one-to-many relationshop from user to card
+database.User.hasMany(database.Card, {
+    as: "cards"
+});
+
+database.Card.belongsTo(database.User, {
+    foreignKey: "userId",
+    as: "user"
+});
+
 //Create one-to-many relationship from collection to cards
 database.Collection.hasMany(database.Card, {
     as: "cards"

@@ -78,6 +78,7 @@ class Content extends React.Component {
         this.onLikeOwnCard = this.onLikeOwnCard.bind(this);
         this.unlikeLikedCollection = this.unlikeLikedCollection.bind(this);
         this.unlikeLikedCard = this.unlikeLikedCard.bind(this);
+        this.onHotCollectionLiked = this.onHotCollectionLiked.bind(this);
     }
 
     //Component mounted -> Get data
@@ -504,6 +505,7 @@ class Content extends React.Component {
 
                 //Reload my collections
                 this.loadMyCollections();
+                this.loadHotCollections();
             })
             .catch(error => {
                 //Get message
@@ -547,6 +549,76 @@ class Content extends React.Component {
             });
     }
 
+    //On hot collection liked
+    onHotCollectionLiked(id, index) {
+        //Check if liked or not
+        if (this.state.hotCollections[index].liked === 0) {
+            //If not liked -> Like
+            likeCollection(id)
+                .then(response => {
+                    //Successfuly liked the collection
+                    let hotCollections = this.state.hotCollections;
+                    
+                    //Modify element
+                   hotCollections[index] = {
+                        ...hotCollections[index],
+                        likes: hotCollections[index].likes + 1,
+                        liked: 1
+                    };
+
+                    //Add liked collection to liked collections
+                    let likedCollections = this.state.likedCollections;
+                    let collectionIndex = hotCollections.findIndex(item => item.id === id);
+                    likedCollections = [...likedCollections, hotCollections[collectionIndex]];
+
+                    //Set collection
+                    this.setState({
+                        hotCollections,
+                        likedCollections
+                    });
+                })
+                .catch(error => {
+                    //Get message
+                    const status = error.response.status;
+
+                    //Not authorized -> Expired token
+                    if (status === 403) {
+                        this.setState({
+                            unauthorized: true
+                        });
+                    }
+                });
+        } else {   
+            //If already liked -> Unlike
+            unlikeCollection(id)
+                .then(reponse => {
+                    //Successfuly liked the collection
+                    let hotCollections = this.state.hotCollections;
+                    
+                    //Modify element
+                    hotCollections[index] = {
+                        ...hotCollections[index],
+                        likes: hotCollections[index].likes - 1,
+                        liked: 0
+                    };
+
+                    //Remove from likedCollection
+                    let likedCollections = this.state.likedCollections;
+                    let collectionIndex = likedCollections.findIndex(item => item.id === id);
+                    likedCollections.splice(collectionIndex, 1);
+
+                    //Set collection
+                    this.setState({
+                        hotCollections,
+                        likedCollections
+                    });
+                })
+                .catch(error => {
+
+                });
+        }
+    }
+
     render() {
         //Get state
         const {
@@ -576,6 +648,7 @@ class Content extends React.Component {
                     <TabChild name="Hot">
                         <CollectionCarousel 
                             collections={hotCollections}
+                            onCollectionLike={(id, index) => this.onHotCollectionLiked(id, index)}
                             title="Hot collections"/>
 
                         <CardCarousel

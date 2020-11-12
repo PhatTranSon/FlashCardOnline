@@ -32,12 +32,10 @@ class CardCarousel extends React.Component {
                 {
                     cards.map((card, index) => {
                         return (
-                            <div>
-                                <Card 
-                                    {...card}
-                                    showDelete={false}
-                                    key={index}/>
-                            </div>
+                            <Card 
+                                {...card}
+                                showDelete={false}
+                                key={index}/>
                         )
                     })
                 }
