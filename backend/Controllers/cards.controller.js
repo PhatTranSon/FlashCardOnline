@@ -7,6 +7,8 @@ const User = database.User;
 
 const { ValidationError } = database.Sequelize;
 
+const sequelize = database.sequelize;
+
 //Helper methods to get cards along likes
 function getAllCardsLikeCount(collectionId) {
     let cardsLikesCounted = Card
@@ -168,6 +170,7 @@ function viewAllCardsLoggedIn(req, resp) {
                         [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
                     ]
                 },
+                order: sequelize.literal("likes DESC"),
                 group: ['card.id']
             }
         );
@@ -205,9 +208,12 @@ function viewAllCardsLoggedIn(req, resp) {
 
             //Aggregate data
             //Merge objects from 2 arrays
-            checkLiked.forEach((checkedLikeRow, index) => {
+            countLikes.forEach((countedLikesRow, index) => {
+                //Find index
+                let matchedIndex = checkLiked.findIndex(item => item.dataValues.id === countedLikesRow.dataValues.id);
+
                 //Get the count like row
-                let countedLikesRow = countLikes[index];
+                let checkedLikeRow = checkLiked[matchedIndex];
 
                 //Create new object and add to result
                 results.push(
@@ -373,7 +379,7 @@ exports.viewAllCardsFromUser = (req, resp) => {
                     include: [
                         [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
                     ]
-                },
+                }
                 group: ['card.id']
             }
         );

@@ -5,6 +5,8 @@ const User = database.User;
 
 const { ValidationError } = database.Sequelize;
 
+const sequelize = database.sequelize;
+
 //Helpers function to count the number of likes and check if user has liked the post
 function getAllCollectionsLikeCount(userId) {
     let collectionsLikesCounted = Collection
@@ -148,6 +150,7 @@ function getAllCollectionsLoggedIn(req, resp) {
                         [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
                     ]
                 },
+                order: sequelize.literal('likes DESC'),
                 group: ['collection.id']
             }
         );
@@ -171,7 +174,7 @@ function getAllCollectionsLoggedIn(req, resp) {
                 ],
                 attributes: {
                     include: [
-                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"],
                     ]
                 },
                 group: ['collection.id']
@@ -190,9 +193,12 @@ function getAllCollectionsLoggedIn(req, resp) {
             const results = [];
 
             //Merge objects from 2 arrays
-            checkLiked.forEach((checkedLikeRow, index) => {
+            countLikes.forEach((countedLikesRow, index) => {
+                //Find the index of the same id
+                let matchedIndex = checkLiked.findIndex(item => item.dataValues.id === countedLikesRow.dataValues.id);
+
                 //Get the count like row
-                let countedLikesRow = countLikes[index];
+                let checkedLikeRow = checkLiked[matchedIndex];
 
                 //Create new object and add to result
                 results.push(
