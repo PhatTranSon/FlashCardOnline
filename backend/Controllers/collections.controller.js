@@ -2,6 +2,7 @@ const database = require('../Models/index');
 const Collection = database.Collection;
 const CollectionLike = database.CollectionLike;
 const User = database.User;
+const Card = database.Card;
 
 const { ValidationError } = database.Sequelize;
 
@@ -42,35 +43,133 @@ function getAllCollectionsLikeCount(userId) {
 
 function getAllCollectionsCheckLiked(userId) {
     let collectionsLikeChecked = Collection
-    .findAll(
-        {
-            where: {
-                userId
-            },
-            include: [
-                {
-                    //Check if user liked or not
-                    model: User,
-                    where: {
-                        id: userId
-                    },
-                    attributes: [ "id", "name" ],
-                    through: {
-                        attributes: ["createdAt"]
-                    },
-                    required: false
-                }
-            ],
-            attributes: {
+        .findAll(
+            {
+                where: {
+                    userId
+                },
                 include: [
-                    [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
-                ]
-            },
-            group: ['collection.id']
-        }
-    );
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [ "id", "name" ],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        );
 
     return collectionsLikeChecked;
+}
+
+//Method to get one collection using id
+exports.getOneCollection = (req, resp) => {
+    //Get the user id
+    const userId = req.user.id;
+
+    //Get the parameters
+    const { collectionId } = req.params;
+
+    //Create two promises
+    const getCollectionWithLikes = Collection
+        .findOne(
+            {
+                where: {
+                    id: collectionId
+                },
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        attributes: [
+                            "id"
+                        ],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "likes"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        );
+
+    const getCollectionWithLiked = Collection
+        .findOne(
+            {
+                where: {
+                    id: collectionId
+                },
+                include: [
+                    {
+                        //Check if user liked or not
+                        model: User,
+                        where: {
+                            id: userId
+                        },
+                        attributes: [ "id", "name" ],
+                        through: {
+                            attributes: ["createdAt"]
+                        },
+                        required: false
+                    }
+                ],
+                attributes: {
+                    include: [
+                        [database.sequelize.fn("COUNT", database.sequelize.col("users.id")), "liked"]
+                    ]
+                },
+                group: ['collection.id']
+            }
+        );
+
+    //Call promises
+    Promise.all([getCollectionWithLikes, getCollectionWithLiked])
+        .then(response => {
+            //Expand
+            const [collectionWithLikes, collectionWithLiked] = response;
+
+            //Merge them
+            const collection = {
+                userId: collectionWithLiked.dataValues.userId,
+                id: collectionWithLiked.dataValues.id,
+                title: collectionWithLiked.dataValues.title,
+                color: collectionWithLiked.dataValues.color,
+                liked: collectionWithLiked.dataValues.liked,
+                likes: collectionWithLikes.dataValues.likes,
+                cards: collectionWithLiked.dataValues.cards
+            }
+
+            //Respond
+            resp.json(collection);
+            resp.end();
+        })
+        .catch(error => {
+            //Debug
+            console.log(error);
+
+            //Reponse
+            resp.status(500).json({
+                message: "Error getting collection"
+            });
+        });
 }
 
 //Get all collections

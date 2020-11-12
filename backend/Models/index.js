@@ -52,9 +52,7 @@ database.Card.belongsTo(database.User, {
 });
 
 //Create one-to-many relationship from collection to cards
-database.Collection.hasMany(database.Card, {
-    as: "cards"
-});
+database.Collection.hasMany(database.Card);
 
 database.Card.belongsTo(database.Collection, {
     foreignKey: "collectionId",

@@ -2,6 +2,9 @@ const controller = require('../Controllers/collections.controller');
 const { validateToken, getUser } = require('../Helpers/auth.helper');
 
 module.exports = (app) => {
+    //Get one collection
+    app.get('/collections/:collectionId', validateToken, controller.getOneCollection);
+    
     //Get all collections for non-user
     app.get('/collections', getUser, controller.getAllCollections);
 

@@ -18,6 +18,7 @@ class Card extends React.Component {
         //Bind methods
         this.onDelete = this.onDelete.bind(this);
         this.onLike = this.onLike.bind(this);
+        this.speak = this.speak.bind(this);
     }
 
     onLike(id) {
@@ -26,6 +27,15 @@ class Card extends React.Component {
 
     onDelete(id) {
         this.props.onDelete(id);
+    }
+
+    speak() {
+        //Get the word
+        const { title } = this.props;
+
+        //Call speech
+        const msg = new SpeechSynthesisUtterance(title);
+        window.speechSynthesis.speak(msg);
     }
 
     render() {
@@ -39,7 +49,9 @@ class Card extends React.Component {
 
                     <h1 className="flashcard-title">
                         <span style={{ marginRight: "1vh" }}>{ title }</span>
-                        <FontAwesomeIcon icon={ faVolumeUp } />
+                        <FontAwesomeIcon 
+                            icon={ faVolumeUp } 
+                            onClick={() => this.speak() }/>
                     </h1>
                     <p className="flashcard-phonetic">{ phonetic }</p>
                     <p className="flashcard-description">{ description }</p>
