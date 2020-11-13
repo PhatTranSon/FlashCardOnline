@@ -105,6 +105,10 @@ function createCollection(title, description, color) {
     return makeRequest('/collections', { title, description, color }, 'post', true);
 }
 
+function updateCollection(id, title, description, color) {
+    return makeRequest(`/collections/${id}`, { title, description, color }, 'put', true);
+}
+
 //Get all cards
 function getAllCards() {
     return axios({
@@ -163,6 +167,7 @@ export {
     getOneCollection,
     getMyCollections,
     createCollection,
+    updateCollection,
     deleteCollection,
     likeCollection,
     unlikeCollection,

@@ -77,3 +77,7 @@ exports.logout = () => {
 exports.getAccessToken = () => {
     return localStorage.getItem("accessToken");
 }
+
+exports.getUserId = () => {
+    return localStorage.getItem("userId");
+}
