@@ -147,6 +147,11 @@ function getCardsFromCollection(id) {
     return makeRequest('/cardsfromcollection', { collectionId: id }, 'post', true);
 }
 
+//Create cards
+function createCard(collectionId, title, phonetic, description, color) {
+    return makeRequest('/cards', { collectionId, title, phonetic, description, color }, 'post', true);
+}
+
 //Delete card
 function deleteCard(id) {
     return makeRequest('/cards/delete', { id }, 'post', true);
@@ -178,6 +183,7 @@ export {
     getCardsFromCollection,
     getMyCards,
     getLikedCards,
+    createCard,
     likeCard,
     unlikeCard,
     deleteCard

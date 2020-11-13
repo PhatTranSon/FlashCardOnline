@@ -11,7 +11,8 @@ import Navbar from '../Common/LogOutNavbar';
 
 import { 
     getOneCollection,
-    getCardsFromCollection
+    getCardsFromCollection,
+    createCard
 } from '../../Common/Operations';
 
 import {
@@ -31,6 +32,7 @@ import {
 import {
     updateCollection
 } from '../../Common/Operations';
+import CardModal from './Model/AddCardPanel';
 
 class CollectionDetails extends React.Component {
     constructor(props) {
@@ -50,11 +52,17 @@ class CollectionDetails extends React.Component {
             //Return flag
             back: false,
 
-            //Modal open or not
+            //Collection modal open or not
             updateModalOpen: false,
             updateModalSuccess: false,
             updateModalError: false,
-            updateModalMessage: ""
+            updateModalMessage: "",
+
+            //Card modal open or not
+            cardModalOpen: false,
+            cardModalSuccess: false,
+            cardModalError: false,
+            cardModalMessage: false
         }
 
         this.loadCollection = this.loadCollection.bind(this);
@@ -65,6 +73,8 @@ class CollectionDetails extends React.Component {
         this.onTest = this.onTest.bind(this);
         this.updateCollection = this.updateCollection.bind(this);
         this.closeUpdateModal = this.closeUpdateModal.bind(this);
+        this.closeCardModal = this.closeCardModal.bind(this);
+        this.createCard = this.createCard.bind(this);
     }
 
     componentDidMount() {
@@ -126,7 +136,9 @@ class CollectionDetails extends React.Component {
 
     //Event handlers for icon
     onAdd() {
-        
+        this.setState({
+            cardModalOpen: true
+        });
     }
 
     onEdit() {
@@ -171,6 +183,38 @@ class CollectionDetails extends React.Component {
             });
     }
 
+    //Create card
+    createCard(data) {
+        //Get the collection id
+        const collectionId = this.state.id;
+
+        //Expand to get the data
+        const { title, phonetic, description, color } = data;
+
+        //Make request
+        createCard(collectionId, title, phonetic, description, color)
+            .then(response => {
+                //Get data from reponse
+                const card = response.data;
+
+                //Set state
+                this.setState({
+                    cards: [...this.state.cards, card],
+                    cardModalSuccess: true
+                });
+            })
+            .catch(error => {
+                //Error handing - Set error
+                const data = error.response.data;
+
+                //Set error and error message
+                this.setState({
+                    cardModalError: true,
+                    cardModalMessage: data.message
+                });
+            })
+    }
+
     //Close update modal
     closeUpdateModal() {
         //Reset modal
@@ -182,13 +226,23 @@ class CollectionDetails extends React.Component {
         });
     }
 
+    closeCardModal() {
+        this.setState({
+            cardModalOpen: false,
+            cardModalSuccess: false,
+            cardModalError: false,
+            cardModalMessage: false
+        });
+    }
+
     render() {
         //Expand state
         const { 
             userId, id, title, color, description, liked, likes, 
             cards, 
             back,
-            updateModalOpen, updateModalSuccess, updateModalError, updateModalMessage
+            updateModalOpen, updateModalSuccess, updateModalError, updateModalMessage,
+            cardModalOpen, cardModalSuccess, cardModalError, cardModalMessage
         } = this.state;
 
         //Check if user is owner
@@ -246,6 +300,18 @@ class CollectionDetails extends React.Component {
                                 description={description}
                                 onUpdateCollection={this.updateCollection}
                                 onSuccessButtonClicked={this.closeUpdateModal}/> :
+                            null
+                        }
+                        {
+                            owner ?
+                            <CardModal 
+                                isOpen={cardModalOpen}
+                                success={cardModalSuccess}
+                                error={cardModalError}
+                                errorMessage={cardModalMessage}
+                                onCreateCard={this.createCard}
+                                onSuccessButtonClicked={this.closeCardModal}
+                                onCreateCard={this.createCard}/> :
                             null
                         }
                     </div> : 
