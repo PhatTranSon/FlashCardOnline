@@ -1,4 +1,9 @@
 import React from 'react';
+
+import {
+
+} from 'react-router-dom';
+
 import './style.css';
 
 import TabChild from './Tab/TabChild';
@@ -59,7 +64,10 @@ class Content extends React.Component {
             showCollectionModal: false,
             modalSuccess: false,
             modalError: false,
-            modalErrorMessage: ""
+            modalErrorMessage: "",
+
+            //Chosen collection to go to details
+            chosenCollection: null
         }
 
         //Bind
@@ -712,7 +720,10 @@ class Content extends React.Component {
     }
 
     onCollectionCliked(id) {
-        console.log(id);
+        //Redirect to collection details
+        this.setState({
+            chosenCollection: id
+        });
     }
 
     render() {
@@ -728,7 +739,8 @@ class Content extends React.Component {
             modalErrorMessage,
             modalError,
             modalSuccess,
-            unauthorized
+            unauthorized,
+            chosenCollection
         } = this.state;
 
 
@@ -738,81 +750,85 @@ class Content extends React.Component {
                 pathname: '/login',
                 state: { message: 'Token expired. Please log in again' }
             }}/> :
-            <div className="content-box">
-                { /* Section for tab */ }
-                <TabParent>
-                    <TabChild name="Hot">
-                        <CollectionCarousel 
-                            collections={hotCollections}
-                            onCollectionLike={(id, index) => this.onHotCollectionLiked(id, index)}
-                            onCollectionClick={(id) => this.onCollectionCliked(id)}
-                            title="Hot collections"/>
+            (
+                chosenCollection ? 
+                <Redirect to={`/collections/${chosenCollection}`}/> :
+                <div className="content-box">
+                    { /* Section for tab */ }
+                    <TabParent>
+                        <TabChild name="Hot">
+                            <CollectionCarousel 
+                                collections={hotCollections}
+                                onCollectionLike={(id, index) => this.onHotCollectionLiked(id, index)}
+                                onCollectionClick={(id) => this.onCollectionCliked(id)}
+                                title="Hot collections"/>
 
-                        <CardCarousel
-                            cards={hotCards}
-                            onCardLike={(id, index) => this.onHotCardLiked(id, index)}
-                            title="Hot flashcards"/>
-                    </TabChild>
+                            <CardCarousel
+                                cards={hotCards}
+                                onCardLike={(id, index) => this.onHotCardLiked(id, index)}
+                                title="Hot flashcards"/>
+                        </TabChild>
 
-                    <TabChild name="Mine">
-                        { /* Collections with add icon */ }
-                        <CollectionCards 
-                            title={
-                                <p>
-                                    <span style={{marginRight: "2vh"}}>
-                                        Your collections
-                                    </span>
+                        <TabChild name="Mine">
+                            { /* Collections with add icon */ }
+                            <CollectionCards 
+                                title={
+                                    <p>
+                                        <span style={{marginRight: "2vh"}}>
+                                            Your collections
+                                        </span>
 
-                                    <FontAwesomeIcon 
-                                        icon={ faPlusCircle }
-                                        onClick={() => this.toggleModal()}/>
-                                </p>
-                            }
-                            cards={myCollections}
-                            onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
-                            onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}
-                            onClickCollection={(id) => this.onCollectionCliked(id)}
-                            showDelete={true}/>
+                                        <FontAwesomeIcon 
+                                            icon={ faPlusCircle }
+                                            onClick={() => this.toggleModal()}/>
+                                    </p>
+                                }
+                                cards={myCollections}
+                                onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
+                                onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}
+                                onClickCollection={(id) => this.onCollectionCliked(id)}
+                                showDelete={true}/>
 
-                        { /* Cards */ }
-                        <FlashCards 
-                            title={"Your cards"}
-                            showDelete={false}
-                            cards={myCards}
-                            showDelete={true}
-                            onLikeCard={(id, index) => this.onLikeOwnCard(id, index)}
-                            onDeleteCard={(id, index) => this.onDeleteCard(id, index)}/>
-                    </TabChild>
+                            { /* Cards */ }
+                            <FlashCards 
+                                title={"Your cards"}
+                                showDelete={false}
+                                cards={myCards}
+                                showDelete={true}
+                                onLikeCard={(id, index) => this.onLikeOwnCard(id, index)}
+                                onDeleteCard={(id, index) => this.onDeleteCard(id, index)}/>
+                        </TabChild>
 
-                    <TabChild name="Liked">
-                        { /* Collections with no add icon */ }
-                        <CollectionCards 
-                            title="Like collections"
-                            cards={likedCollections}
-                            onLikeCollection={(id, index) => this.unlikeLikedCollection(id, index)}
-                            onClickCollection={(id) => this.onCollectionCliked(id)}
-                            showDelete={false}/>
+                        <TabChild name="Liked">
+                            { /* Collections with no add icon */ }
+                            <CollectionCards 
+                                title="Like collections"
+                                cards={likedCollections}
+                                onLikeCollection={(id, index) => this.unlikeLikedCollection(id, index)}
+                                onClickCollection={(id) => this.onCollectionCliked(id)}
+                                showDelete={false}/>
 
-                        { /* Cards */ }
-                        <FlashCards 
-                            title={"Liked cards"}
-                            showDelete={false}
-                            cards={likedCards}
-                            showDelete={false}
-                            onLikeCard={(id, index) => this.unlikeLikedCard(id, index)}/>
-                    </TabChild>
-                </TabParent>
+                            { /* Cards */ }
+                            <FlashCards 
+                                title={"Liked cards"}
+                                showDelete={false}
+                                cards={likedCards}
+                                showDelete={false}
+                                onLikeCard={(id, index) => this.unlikeLikedCard(id, index)}/>
+                        </TabChild>
+                    </TabParent>
 
-                { /* Section for create modal */ }
-                <Modal 
-                    isOpen={showCollectionModal}
-                    success={modalSuccess}
-                    error={modalError}
-                    errorMessage={modalErrorMessage}
-                    onCreateCollection={this.createCollection}
-                    onClose={this.closeModal}
-                    onSuccessButtonClicked={this.onModalSuccessButton}/>
-            </div>
+                    { /* Section for create modal */ }
+                    <Modal 
+                        isOpen={showCollectionModal}
+                        success={modalSuccess}
+                        error={modalError}
+                        errorMessage={modalErrorMessage}
+                        onCreateCollection={this.createCollection}
+                        onClose={this.closeModal}
+                        onSuccessButtonClicked={this.onModalSuccessButton}/>
+                </div>
+            )
         )
     }
 }

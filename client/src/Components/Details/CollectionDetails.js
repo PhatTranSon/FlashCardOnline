@@ -1,11 +1,15 @@
 import React from 'react';
+
+import {
+    Redirect
+} from 'react-router-dom';
+
 import './style.css';
 import Navbar from '../Common/LogOutNavbar';
 
 import { 
     getOneCollection,
-    getCardsFromCollection,
-    getAllCollections
+    getCardsFromCollection
 } from '../../Common/Operations';
 
 import {
@@ -21,17 +25,22 @@ class CollectionDetails extends React.Component {
         super(props);
 
         this.state = {
+            //Collection data
             id: null,
             title: null,
             color: null,
             description: null,
             liked: null,
             likes: null,
-            cards: []
+            cards: [],
+
+            //Return flag
+            back: false
         }
 
         this.loadCollection = this.loadCollection.bind(this);
         this.loadCards = this.loadCards.bind(this);
+        this.returnHome = this.returnHome.bind(this);
     }
 
     componentDidMount() {
@@ -83,21 +92,32 @@ class CollectionDetails extends React.Component {
             });
     }
 
+    returnHome() {
+        this.setState({
+            back: true
+        });
+    }
+
     render() {
         //Expand state
-        const { id, title, color, description, liked, likes, cards } = this.state;
+        const { id, title, color, description, liked, likes, cards, back } = this.state;
 
         console.log(cards);
 
         //Render
         return (
+            back ? 
+            <Redirect to="/panel"/> :
             <div>
                 <Navbar/>
                 {
                     title ? 
                     <div className="collection-details-panel">
                         <div style={{ marginBottom: "3vh" }}>
-                            <FontAwesomeIcon icon={ faLongArrowAltLeft } size="3x"/>
+                            <FontAwesomeIcon 
+                                icon={ faLongArrowAltLeft } 
+                                size="3x"
+                                onClick={() => this.returnHome()}/>
                         </div>
 
                         <h1 className="collection-details-title"
