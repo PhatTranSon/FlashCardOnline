@@ -21,12 +21,14 @@ class Like extends React.Component {
         this.onLikeClicked = this.onLikeClicked.bind(this);
     }
 
-    onDeleteClicked() {
+    onDeleteClicked(e) {
+        e.stopPropagation();
         //Call passed method
         this.props.onDelete();
     }
 
-    onLikeClicked() {
+    onLikeClicked(e) {
+        e.stopPropagation();
         //Call passed method
         this.props.onLike();
     }
@@ -46,7 +48,7 @@ class Like extends React.Component {
                         icon={faTrash} 
                         className="green-icon"
                         style={{ marginRight: "2vh"}}
-                        onClick={() => this.onDeleteClicked()}/> 
+                        onClick={(e) => this.onDeleteClicked(e)}/> 
                     : null
                 }
                 {
@@ -55,12 +57,12 @@ class Like extends React.Component {
                         icon={faHeart} 
                         style={{ marginRight: "1vh"}} 
                         className="red-icon"
-                        onClick={() => this.onLikeClicked()}/>:
+                        onClick={(e) => this.onLikeClicked(e)}/>:
                     <FontAwesomeIcon 
                         icon={faHeartRegular} 
                         style={{ marginRight: "1vh"}}
                         className="red-icon"
-                        onClick={() => this.onLikeClicked()}/>
+                        onClick={(e) => this.onLikeClicked(e)}/>
                 }
                 <span style={ inverted ? { color: 'white' }: null}>{likes}</span>
             </div>
