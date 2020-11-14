@@ -161,9 +161,7 @@ class TestModal extends React.Component {
 
         //Calculate the progress
         const timeProgress = 100 - Math.floor(currentTime * 100 / this.answerTime);
-
-        console.log(currentTime);
-
+        
         //Display
         return (
             currentQuestion ? 

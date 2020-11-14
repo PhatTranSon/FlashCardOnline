@@ -1,9 +1,4 @@
 import React from 'react';
-
-import {
-
-} from 'react-router-dom';
-
 import './style.css';
 
 import TabChild from './Tab/TabChild';
@@ -39,6 +34,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { Redirect } from 'react-router-dom';
+import { CircleLoader } from 'react-spinners';
+import Loader from 'react-loader-spinner';
 
 class Content extends React.Component {
     constructor(props) {
@@ -50,7 +47,9 @@ class Content extends React.Component {
             myCards: [],
 
             //Hot collections and cards
+            hotCollectionsLoading: false,
             hotCollections: [],
+            hotCardsLoading: false,
             hotCards: [],
 
             //Liked collections and cards
@@ -155,6 +154,11 @@ class Content extends React.Component {
     }
 
     loadHotCollections() {
+        //Set loading to true
+        this.setState({
+            hotCollectionsLoading: true
+        });
+
         //Get all collections sorted by likes
         getAllCollections()
             .then(response => {
@@ -163,7 +167,8 @@ class Content extends React.Component {
 
                 //Set state
                 this.setState({
-                    hotCollections: collections
+                    hotCollections: collections,
+                    hotCollectionsLoading: false,
                 });
             })
             .catch(error => {
@@ -174,6 +179,11 @@ class Content extends React.Component {
     }
 
     loadHotCards() {
+        //Set loading
+        this.setState({
+            hotCardsLoading: true
+        });
+
         //Get all cards sorted by likes
         getAllCards()
             .then((response) => {
@@ -184,7 +194,8 @@ class Content extends React.Component {
 
                 //Set state
                 this.setState({
-                    hotCards: cards
+                    hotCards: cards,
+                    hotCardsLoading: false
                 })
             })
             .catch((error) => {
@@ -726,18 +737,29 @@ class Content extends React.Component {
         const {
             myCollections,
             myCards,
+
             hotCollections,
+            hotCollectionsLoading,
             hotCards,
+            hotCardsLoading,
+
             likedCards,
             likedCollections,
+
             showCollectionModal,
             modalErrorMessage,
             modalError,
             modalSuccess,
+
             unauthorized,
             chosenCollection
         } = this.state;
 
+        //Spinner styling
+        const spinnerStyle = `
+            display: block;
+            margin: 0 auto;
+        `;
 
         return (
             unauthorized ? 
@@ -752,16 +774,36 @@ class Content extends React.Component {
                     { /* Section for tab */ }
                     <TabParent>
                         <TabChild name="Hot">
-                            <CollectionCarousel 
-                                collections={hotCollections}
-                                onCollectionLike={(id, index) => this.onHotCollectionLiked(id, index)}
-                                onCollectionClick={(id) => this.onCollectionCliked(id)}
-                                title="Hot collections"/>
+                            {
+                                hotCollectionsLoading ?
+                                <div className="loader-wrapper">
+                                    <Loader
+                                        type="Puff"
+                                        color="#2A9D8F"
+                                        height={100}
+                                        width={100}/>
+                                </div> : 
+                                <CollectionCarousel 
+                                    collections={hotCollections}
+                                    onCollectionLike={(id, index) => this.onHotCollectionLiked(id, index)}
+                                    onCollectionClick={(id) => this.onCollectionCliked(id)}
+                                    title="Hot collections"/>
+                            }
 
-                            <CardCarousel
-                                cards={hotCards}
-                                onCardLike={(id, index) => this.onHotCardLiked(id, index)}
-                                title="Hot flashcards"/>
+                            {
+                                hotCardsLoading ?
+                                <div className="loader-wrapper">
+                                    <Loader
+                                        type="Puff"
+                                        color="#2A9D8F"
+                                        height={100}
+                                        width={100}/>
+                                </div> : 
+                                <CardCarousel
+                                    cards={hotCards}
+                                    onCardLike={(id, index) => this.onHotCardLiked(id, index)}
+                                    title="Hot flashcards"/>
+                            }
                         </TabChild>
 
                         <TabChild name="Mine">

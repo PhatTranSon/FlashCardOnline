@@ -38,3 +38,13 @@
     color: #2a9d8f;
     margin-bottom: 2vh;
 }
+
+/* Loading */
+.loader-wrapper {
+    text-align: center;
+    padding: 5vh;
+}
+
+.loader-wrapper div {
+    display: inline-block;
+}

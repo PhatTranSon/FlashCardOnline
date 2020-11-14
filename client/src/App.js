@@ -1,6 +1,9 @@
 //Univerisal Bulma CSS library
 import 'bulma/css/bulma.min.css';
 
+//Loader css library
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+
 //React router dom for navigation
 import {
   BrowserRouter as Router,

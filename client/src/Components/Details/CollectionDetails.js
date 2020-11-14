@@ -6,6 +6,8 @@ import {
     Redirect
 } from 'react-router-dom';
 
+import Loader from 'react-loader-spinner';
+
 import './style.css';
 import Navbar from '../Common/LogOutNavbar';
 
@@ -43,6 +45,9 @@ class CollectionDetails extends React.Component {
         super(props);
 
         this.state = {
+            //Collection loading state
+            collectionLoading: false,
+
             //Collection data
             id: null,
             userId: null,
@@ -51,6 +56,9 @@ class CollectionDetails extends React.Component {
             description: null,
             liked: null,
             likes: null,
+
+            //Card loading
+            cardsLoading: false,
             cards: [],
 
             //Return flag
@@ -96,6 +104,11 @@ class CollectionDetails extends React.Component {
     loadCollection() {
         //Get collection id from collection
         const { collectionId } = this.props.match.params;
+
+        //Set to loading first
+        this.setState({
+            collectionLoading: true
+        });
         
         //Get the collection
         getOneCollection(collectionId)
@@ -104,7 +117,10 @@ class CollectionDetails extends React.Component {
                 const collection = response.data;
 
                 //Set state
-                this.setState(collection);
+                this.setState({ 
+                    ...collection,
+                    collectionLoading: false
+                });
             })
             .catch(error => {
                 //Error handling
@@ -322,8 +338,8 @@ class CollectionDetails extends React.Component {
     render() {
         //Expand state
         const { 
-            userId, id, title, color, description, liked, likes, 
-            cards, 
+            userId, id, title, color, description, liked, likes, collectionLoading,
+            cards, cardsLoading,
             back,
             updateModalOpen, updateModalSuccess, updateModalError, updateModalMessage,
             cardModalOpen, cardModalSuccess, cardModalError, cardModalMessage,
@@ -340,77 +356,87 @@ class CollectionDetails extends React.Component {
             <div>
                 <Navbar/>
                 {
-                    id ? 
-                    <div className="collection-details-panel">
-                        <div style={{ marginBottom: "3vh" }}>
-                            <FontAwesomeIcon 
-                                icon={ faLongArrowAltLeft } 
-                                size="3x"
-                                onClick={() => this.returnHome()}/>
-                        </div>
-
-                        <div className="columns">
-                            <div className="column is-four-fifths">
-                                <h1 className="collection-details-title"
-                                    style={{ 
-                                        borderBottom: `5px solid ${formatColor(color)}`,
-                                        color: formatColor(color)
-                                    }}>
-                                    { title }
-                                </h1>
+                    collectionLoading ? 
+                    <div className="loader-wrapper">
+                        <Loader
+                            type="Puff"
+                            color="#2A9D8F"
+                            height={100}
+                            width={100}/>
+                    </div> : 
+                    (
+                        id ? 
+                        <div className="collection-details-panel">
+                            <div style={{ marginBottom: "3vh" }}>
+                                <FontAwesomeIcon 
+                                    icon={ faLongArrowAltLeft } 
+                                    size="3x"
+                                    onClick={() => this.returnHome()}/>
                             </div>
 
+                            <div className="columns">
+                                <div className="column is-four-fifths">
+                                    <h1 className="collection-details-title"
+                                        style={{ 
+                                            borderBottom: `5px solid ${formatColor(color)}`,
+                                            color: formatColor(color)
+                                        }}>
+                                        { title }
+                                    </h1>
+                                </div>
+
+                                {
+                                    owner ? 
+                                    <div className="column is-one-fifth icon-panel-wrapper">
+                                        <IconPanel size="1x" onAdd={this.onAdd} onEdit={this.onEdit} onTest={this.onTest}/>
+                                    </div> :
+                                    null
+                                }
+                            </div>
+
+                            <p className="collection-details-description">
+                                { description }
+                            </p>
+
+                            <FlashCards 
+                                cards={cards}
+                                showDelete={owner}
+                                onDeleteCard={this.deleteCard}
+                                onLikeCard={this.likeCard}/>
                             {
                                 owner ? 
-                                <div className="column is-one-fifth icon-panel-wrapper">
-                                    <IconPanel size="1x" onAdd={this.onAdd} onEdit={this.onEdit} onTest={this.onTest}/>
-                                </div> :
+                                <CollectionModal 
+                                    isOpen={updateModalOpen}
+                                    success={updateModalSuccess}
+                                    error={updateModalError}
+                                    errorMessage={updateModalMessage}
+                                    title={title}
+                                    description={description}
+                                    onUpdateCollection={this.updateCollection}
+                                    onSuccessButtonClicked={this.closeUpdateModal}/> :
                                 null
                             }
-                        </div>
-
-                        <p className="collection-details-description">
-                            { description }
-                        </p>
-
-                        <FlashCards 
-                            cards={cards}
-                            showDelete={owner}
-                            onDeleteCard={this.deleteCard}
-                            onLikeCard={this.likeCard}/>
-                        {
-                            owner ? 
-                            <CollectionModal 
-                                isOpen={updateModalOpen}
-                                success={updateModalSuccess}
-                                error={updateModalError}
-                                errorMessage={updateModalMessage}
-                                title={title}
-                                description={description}
-                                onUpdateCollection={this.updateCollection}
-                                onSuccessButtonClicked={this.closeUpdateModal}/> :
-                            null
-                        }
-                        {
-                            owner ?
-                            <CardModal 
-                                isOpen={cardModalOpen}
-                                success={cardModalSuccess}
-                                error={cardModalError}
-                                errorMessage={cardModalMessage}
-                                onCreateCard={this.createCard}
-                                onSuccessButtonClicked={this.closeCardModal}
-                                onCreateCard={this.createCard}/> :
-                            null
-                        }
-                        <TestModal 
-                            key={testModalToggle}
-                            isOpen={testModalOpen}
-                            cards={cards}
-                            collection={{userId, id, title, color, description, liked, likes }}
-                            onDoneClicked={this.closeTestModal}/>
-                    </div> : 
-                    null
+                            {
+                                owner ?
+                                <CardModal 
+                                    isOpen={cardModalOpen}
+                                    success={cardModalSuccess}
+                                    error={cardModalError}
+                                    errorMessage={cardModalMessage}
+                                    onCreateCard={this.createCard}
+                                    onSuccessButtonClicked={this.closeCardModal}
+                                    onCreateCard={this.createCard}/> :
+                                null
+                            }
+                            <TestModal 
+                                key={testModalToggle}
+                                isOpen={testModalOpen}
+                                cards={cards}
+                                collection={{userId, id, title, color, description, liked, likes }}
+                                onDoneClicked={this.closeTestModal}/>
+                        </div> :
+                        null
+                    )
                 }
             </div>
         )
