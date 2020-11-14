@@ -316,7 +316,7 @@ function getAllCollectionsLoggedIn(req, resp) {
 
             //Serve result
             resp.json({
-                collections: results
+                collections: results.slice(0, 7) //Get only 7 items [Need reimplementation]
             });
             resp.end();
         })

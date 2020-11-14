@@ -63,8 +63,6 @@ class CollectionModal extends React.Component {
         //Get the props
         const { isOpen, error, success, errorMessage, title, description } = this.props;
 
-        console.log(errorMessage);
-
         //Custom modal style
         const customStyles = {
             content : {

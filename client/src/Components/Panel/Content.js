@@ -110,7 +110,6 @@ class Content extends React.Component {
     loadMyCollections() {
         getMyCollections()
             .then((response) => {
-                console.log(response);
                 //Get the collections
                 const collections = response.data.collections;
 
@@ -256,7 +255,6 @@ class Content extends React.Component {
         //console.log(title, color, description);
         createCollection(title, description, color)
             .then(response => {
-                console.log('success');
                 //Get the newly created collection
                 const newCollection = {
                     id: response.data.id,
@@ -275,15 +273,12 @@ class Content extends React.Component {
                 });
             })
             .catch(error => {
-                console.log('error');
                 //Get the error
                 const status = error.response.status;
                 const data = error.response.data;
                 
                 //Get the error message
                 const errorMessage = data.message;
-
-                console.log(errorMessage);
 
                 //Set the modal error
                 this.setState({
@@ -490,7 +485,7 @@ class Content extends React.Component {
                     });
                 })
                 .catch(error => {
-                    console.log(error);
+                    //console.log(error);
                     //Get message
                     const status = error.response.status;
 
@@ -705,7 +700,7 @@ class Content extends React.Component {
                     });
                 })
                 .catch(error => {
-                    console.log(error);
+                    //console.log(error);
                     //Get message
                     const status = error.response.status;
 

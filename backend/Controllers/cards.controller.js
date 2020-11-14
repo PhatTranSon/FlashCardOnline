@@ -235,7 +235,7 @@ function viewAllCardsLoggedIn(req, resp) {
 
             //Respond with data
             resp.json({
-                cards: results
+                cards: results.slice(0, 7) //Get only 7 items [Need reimplementation]
             });
             resp.end();
         })

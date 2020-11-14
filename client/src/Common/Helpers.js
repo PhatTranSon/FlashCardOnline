@@ -1,4 +1,3 @@
-const { default: Axios } = require('axios');
 const axios = require('axios');
 
 exports.formatColor = color => '#' + color;
@@ -36,4 +35,13 @@ exports.getPhonetic = (word, callback) => {
             console.log(error);
             callback(new Error('Unknown error getting phonetic'), null);
         });
+}
+
+exports.shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
 }

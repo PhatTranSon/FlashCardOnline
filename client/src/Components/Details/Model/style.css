@@ -14,3 +14,37 @@
     color: #2a9d8f;
     margin-bottom: 2vh;
 }
+
+/* Styling for start */
+.start-screen {
+    text-align: center;
+}
+
+.start-screen * {
+    margin-bottom: 2vh;
+}
+
+.start-screen h1 {
+    font-size: 5vh;
+}
+
+.start-screen p {
+    font-size: 3vh;
+}
+
+/* Styling for result */
+.result-screen {
+    text-align: center;
+}
+
+.result-screen * {
+    margin-bottom: 2vh;
+}
+
+.result-screen h1 {
+    font-size: 5vh;
+}
+
+.result-screen p {
+    font-size: 10vh;
+}

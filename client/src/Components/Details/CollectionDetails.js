@@ -12,7 +12,10 @@ import Navbar from '../Common/LogOutNavbar';
 import { 
     getOneCollection,
     getCardsFromCollection,
-    createCard
+    createCard,
+    likeCard,
+    unlikeCard,
+    deleteCard
 } from '../../Common/Operations';
 
 import {
@@ -33,6 +36,7 @@ import {
     updateCollection
 } from '../../Common/Operations';
 import CardModal from './Model/AddCardPanel';
+import TestModal from './Model/TestModal';
 
 class CollectionDetails extends React.Component {
     constructor(props) {
@@ -62,7 +66,11 @@ class CollectionDetails extends React.Component {
             cardModalOpen: false,
             cardModalSuccess: false,
             cardModalError: false,
-            cardModalMessage: false
+            cardModalMessage: false,
+
+            //Test modal open or not
+            testModalOpen: false,
+            testModalToggle: 0
         }
 
         this.loadCollection = this.loadCollection.bind(this);
@@ -74,7 +82,10 @@ class CollectionDetails extends React.Component {
         this.updateCollection = this.updateCollection.bind(this);
         this.closeUpdateModal = this.closeUpdateModal.bind(this);
         this.closeCardModal = this.closeCardModal.bind(this);
+        this.closeTestModal = this.closeTestModal.bind(this);
         this.createCard = this.createCard.bind(this);
+        this.likeCard = this.likeCard.bind(this);
+        this.deleteCard = this.deleteCard.bind(this);
     }
 
     componentDidMount() {
@@ -91,8 +102,6 @@ class CollectionDetails extends React.Component {
             .then(response => {
                 //Get
                 const collection = response.data;
-                
-                console.log(collection.userId);
 
                 //Set state
                 this.setState(collection);
@@ -149,7 +158,11 @@ class CollectionDetails extends React.Component {
     }
 
     onTest() {
-        console.log("test");
+        //Open test modal
+        this.setState({
+            testModalOpen: true,
+            testModalToggle: !this.state.testModalToggle
+        });
     }
 
     //Method to update collection
@@ -235,6 +248,77 @@ class CollectionDetails extends React.Component {
         });
     }
 
+    closeTestModal() {
+        this.setState({
+            testModalOpen: false
+        });
+    }
+
+    //Method to delete and like cards
+    deleteCard(id, index) {
+        //Get cards
+        const cards = this.state.cards;
+
+        deleteCard(id)
+            .then(response => {
+                //Successfully deleted card
+                cards.splice(index, 1);
+
+                //Set state
+                this.setState({
+                    cards
+                });
+            })
+            .catch(error => {
+                //Error Handling -> TODO
+                console.log(error);
+            });
+    }
+
+    likeCard(id, index) {
+        //Check if card is liked
+        const cards = this.state.cards;
+        
+        //Get the card
+        const card = cards[index];
+
+        if (card.liked === 0) {
+            //Not liked -> Like
+            likeCard(card.id)
+                .then(response => {
+                    //Successfully liked card -> Modify liked status
+                    card.liked = 1;
+                    card.likes += 1;
+
+                    //Set state
+                    this.setState({
+                        cards
+                    });
+                })
+                .catch(error => {
+                    //Error handling -> TODO
+                    console.log(error);
+                });
+        } else {
+            //Liked -> Unliked
+            unlikeCard(card.id)
+                .then(response => {
+                    //Successfully unliked card -> Modify unlike
+                    card.liked = 0;
+                    card.likes -= 1;
+
+                    //Set state
+                    this.setState({
+                        cards
+                    });
+                })
+                .catch(error => {
+                    //Error handling -> TODO
+                    console.log(error);
+                });
+        }
+    }
+
     render() {
         //Expand state
         const { 
@@ -242,7 +326,8 @@ class CollectionDetails extends React.Component {
             cards, 
             back,
             updateModalOpen, updateModalSuccess, updateModalError, updateModalMessage,
-            cardModalOpen, cardModalSuccess, cardModalError, cardModalMessage
+            cardModalOpen, cardModalSuccess, cardModalError, cardModalMessage,
+            testModalOpen, testModalToggle
         } = this.state;
 
         //Check if user is owner
@@ -288,7 +373,11 @@ class CollectionDetails extends React.Component {
                             { description }
                         </p>
 
-                        <FlashCards cards={cards}/>
+                        <FlashCards 
+                            cards={cards}
+                            showDelete={owner}
+                            onDeleteCard={this.deleteCard}
+                            onLikeCard={this.likeCard}/>
                         {
                             owner ? 
                             <CollectionModal 
@@ -314,6 +403,12 @@ class CollectionDetails extends React.Component {
                                 onCreateCard={this.createCard}/> :
                             null
                         }
+                        <TestModal 
+                            key={testModalToggle}
+                            isOpen={testModalOpen}
+                            cards={cards}
+                            collection={{userId, id, title, color, description, liked, likes }}
+                            onDoneClicked={this.closeTestModal}/>
                     </div> : 
                     null
                 }
