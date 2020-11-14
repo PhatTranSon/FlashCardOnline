@@ -2,10 +2,12 @@ import React from 'react';
 import './style.css';
 import Modal from 'react-modal';
 import { formatColor, shuffleArray } from '../../../Common/Helpers';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSadCry, faSadTear, faSmileWink } from '@fortawesome/free-solid-svg-icons';
 
 
 class TestModal extends React.Component {
-    answerTime = 5000;
+    answerTime = 15000;
     
     constructor(props) {
         super(props);
@@ -27,9 +29,14 @@ class TestModal extends React.Component {
 
             currentQuestion: null,                      //Save the current question to display
             currentQuestionNumber: 0,                   //Current number of question answer
-            currentTime: 0,                          //5 seconds timer
+            currentTime: 0,                             //5 seconds timer
             currentScore: 0,                            //Current score of user
-            totalQuestion: this.props.cards.length      //Number of question == Number of cards
+            totalQuestion: this.props.cards.length,     //Number of question == Number of cards
+
+            //Icon to display right or wrong
+            justAnswer: false,
+            isRight: false,
+            answer: ""
         }
 
         //Set the root of modal component
@@ -41,6 +48,8 @@ class TestModal extends React.Component {
         this.renderResult = this.renderResult.bind(this);
         this.startGame = this.startGame.bind(this);
         this.updateQuestion = this.updateQuestion.bind(this);
+        this.onAnswer = this.onAnswer.bind(this);
+        this.captureAnswer = this.captureAnswer.bind(this);
     }
 
     //Helper method to render
@@ -92,23 +101,110 @@ class TestModal extends React.Component {
         );
     }
 
+    //On answer question
+    onAnswer(event) {
+        if (event.key === 'Enter') {
+            //Check if the answer is correct
+            const isCorrect = this.state.answer.toLowerCase() === this.state.currentQuestion.answer.toLowerCase();
+            if (isCorrect) {
+                this.setState({
+                    justAnswer: true,
+                    isRight: true
+                }, () => {
+                   setTimeout(() => {
+                       this.setState({
+                           justAnswer: false,
+                           isRight: false,
+                           answer: "",
+                           currentTime: 0,
+                           currentScore: this.state.currentScore + 1
+                       })
+                   }, 1000);
+                });
+            } else {
+                this.setState({
+                    justAnswer: true,
+                    isRight: false
+                }, () => {
+                   setTimeout(() => {
+                       this.setState({
+                           justAnswer: false,
+                           isRight: false,
+                           answer: "",
+                           currentTime: 0
+                       })
+                   }, 1000);
+                });
+            }
+        }
+    }
+
+    captureAnswer(event) {
+        this.setState({
+            answer: event.target.value
+        });
+    }
+
     renderQuestion() {
         //Get the question and time
-        const { currentQuestion, currentQuestionNumber, currentTime } = this.state;
+        const { 
+            currentQuestion, 
+            currentQuestionNumber, 
+            currentTime, 
+            collection,
+            justAnswer,
+            isRight,
+            answer
+         } = this.state;
+
+        const collectionColor = collection.color;
+
+        //Calculate the progress
+        const timeProgress = 100 - Math.floor(currentTime * 100 / this.answerTime);
+
+        console.log(currentTime);
 
         //Display
         return (
             currentQuestion ? 
-            <div className="question-screen">
+            <div 
+                className="question-screen"
+                style={{color: formatColor(collectionColor)}}>
                 <h1>Question {currentQuestionNumber}</h1>
+
                 <p>{ currentQuestion.question }</p>
+
+                <input 
+                    className="input round-input" 
+                    placeholder="Answer and Enter" 
+                    onKeyDown={this.onAnswer}
+                    onChange={this.captureAnswer}
+                    value={answer}/>
+
+                <p>
+                {
+                    justAnswer ? 
+                    <FontAwesomeIcon 
+                        icon={ isRight ? faSmileWink : faSadTear } 
+                        size="2x" 
+                        style={{color: formatColor(collectionColor)}}/>:
+                    null
+                }
+                </p>
+                
+                <progress 
+                    className="progress is-primary" 
+                    max="100" 
+                    value={timeProgress}>
+                    {timeProgress}%
+                </progress>
             </div> : null
         )
     }
 
     componentDidMount() {
         //Create interval task -> Get the id
-        const intervalId = setInterval(this.updateQuestion, 200);
+        const intervalId = setInterval(this.updateQuestion, 500);
 
         //Set the id
         this.setState({
@@ -125,7 +221,7 @@ class TestModal extends React.Component {
     updateQuestion() {
         if (this.state.started && !this.state.ended) {
             //Only update when game has started but not ended
-            const { currentTime, currentQuestionNumber, cards, intervalId } = this.state;
+            const { currentTime, currentQuestionNumber, cards, intervalId, justAnswer } = this.state;
             const totalQuestion = this.props.cards.length;
 
             if (currentQuestionNumber >= totalQuestion && currentTime <= 0) {
@@ -139,9 +235,12 @@ class TestModal extends React.Component {
             } else {
                 if (currentTime > 0) {
                     //There is still time -> Updating the time only
-                    this.setState({
-                        currentTime: currentTime - 200
-                    });
+                    if (!justAnswer) {
+                        //Stop timer when user just answer
+                        this.setState({
+                            currentTime: currentTime - 500
+                        });
+                    } 
                 } else {
                     //There is no time left -> Updating to new question
                     const card = cards[currentQuestionNumber];
@@ -157,7 +256,7 @@ class TestModal extends React.Component {
                     this.setState({
                         currentQuestion: question,
                         currentQuestionNumber: currentQuestionNumber + 1,
-                        currentTime: 5000,
+                        currentTime: this.answerTime,
                     });
                 }
             }
@@ -170,7 +269,7 @@ class TestModal extends React.Component {
         shuffleArray(cards);
 
         //Create interval task -> Get the id
-        const intervalId = setInterval(this.updateQuestion, 200);
+        const intervalId = setInterval(this.updateQuestion, 500);
 
         //Now set state
         this.setState({
@@ -196,7 +295,7 @@ class TestModal extends React.Component {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 1)'
+                backgroundColor: 'rgba(0, 0, 0, 0.9)'
             },
             content : {
               top                   : '50%',
@@ -206,7 +305,10 @@ class TestModal extends React.Component {
               marginRight           : '-50%',
               transform             : 'translate(-50%, -50%)',
               width                 : "50vw",
-              maxHeight             : "80%"
+              height                : "50%",
+              display               : "flex",
+              alignItems            : "center",
+              justifyContent        : "center"
             }
         };
 
@@ -214,15 +316,15 @@ class TestModal extends React.Component {
             <Modal 
                 style={customStyles} 
                 isOpen={isOpen}>
-            {
-                !started ? 
-                this.renderStartScreen() :
-                (
-                    !ended ? 
-                    this.renderQuestion() :
-                    this.renderResult()
-                )
-            }
+                {
+                    !started ? 
+                    this.renderStartScreen() :
+                    (
+                        !ended ? 
+                        this.renderQuestion() :
+                        this.renderResult()
+                    )
+                }
             </Modal>
         )
     }
