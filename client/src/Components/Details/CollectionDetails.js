@@ -17,7 +17,8 @@ import {
     createCard,
     likeCard,
     unlikeCard,
-    deleteCard
+    deleteCard,
+    submitScore
 } from '../../Common/Operations';
 
 import {
@@ -28,7 +29,7 @@ import { faLongArrowAltLeft } from '@fortawesome/free-solid-svg-icons';
 
 import FlashCards from '../Panel/Card/Cards';
 import IconPanel from './IconPanel';
-import CollectionModal from './Model/UpdateCollectionModal';
+import CollectionModal from './Modal/UpdateCollectionModal';
 
 import {
     getUserId
@@ -37,8 +38,8 @@ import {
 import {
     updateCollection
 } from '../../Common/Operations';
-import CardModal from './Model/AddCardPanel';
-import TestModal from './Model/TestModal';
+import CardModal from './Modal/AddCardPanel';
+import TestModal from './Modal/TestModal';
 
 class CollectionDetails extends React.Component {
     constructor(props) {
@@ -78,7 +79,8 @@ class CollectionDetails extends React.Component {
 
             //Test modal open or not
             testModalOpen: false,
-            testModalToggle: 0
+            testModalToggle: 0,
+            testModalSubmitting: false
         }
 
         this.loadCollection = this.loadCollection.bind(this);
@@ -264,10 +266,41 @@ class CollectionDetails extends React.Component {
         });
     }
 
-    closeTestModal() {
+    closeTestModal(rightQuestions, totalQuestions) {
+        //Get collection id
+        const { id } = this.state;
+
+        //On close modal -> Submit score
         this.setState({
-            testModalOpen: false
+            testModalSubmitting: true
         });
+
+        //Save result -> Close modal
+        submitScore(id, rightQuestions, totalQuestions)
+            .then(response => {
+                //Get the score
+                const score = response.data;
+
+                //Add to scores -> TODO
+
+                //Set loading to off and close modal
+                this.setState({
+                    testModalSubmitting: false,
+                    testModalOpen: false
+                });
+            })
+            .catch(error => {
+                //Debug
+                console.log(error);
+
+                //Error handling -> TODO
+                const status = error.response.status;
+
+                //Close modal
+                TouchList.setState({
+                    testModalOpen: false
+                });
+            });
     }
 
     //Method to delete and like cards
@@ -343,7 +376,7 @@ class CollectionDetails extends React.Component {
             back,
             updateModalOpen, updateModalSuccess, updateModalError, updateModalMessage,
             cardModalOpen, cardModalSuccess, cardModalError, cardModalMessage,
-            testModalOpen, testModalToggle
+            testModalOpen, testModalToggle, testModalSubmitting
         } = this.state;
 
         //Check if user is owner
@@ -433,7 +466,8 @@ class CollectionDetails extends React.Component {
                                 isOpen={testModalOpen}
                                 cards={cards}
                                 collection={{userId, id, title, color, description, liked, likes }}
-                                onDoneClicked={this.closeTestModal}/>
+                                onDoneClicked={this.closeTestModal}
+                                submitting={testModalSubmitting}/>
                         </div> :
                         null
                     )

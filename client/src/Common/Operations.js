@@ -177,6 +177,11 @@ function getAllScores() {
     });
 }
 
+//Submit score
+function submitScore(collectionId, rightQuestions, totalQuestions) {
+    return makeRequest( `/tests/${collectionId}`, { rightQuestions, totalQuestions }, 'post', true);
+}
+
 export {
     //Collection operations
     getAllCollections,
@@ -200,5 +205,6 @@ export {
     deleteCard,
 
     //Score operations
-    getAllScores
+    getAllScores,
+    submitScore
 }

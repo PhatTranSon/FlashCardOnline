@@ -78,3 +78,13 @@
 .question-screen input {
     width: 50%;
 }
+
+/* Loader */
+.loader-wrapper {
+    text-align: center;
+    padding: 5vh;
+}
+
+.loader-wrapper div {
+    display: inline-block;
+}

@@ -3,8 +3,9 @@ import './style.css';
 import Modal from 'react-modal';
 import { formatColor, shuffleArray } from '../../../Common/Helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSadCry, faSadTear, faSmileWink } from '@fortawesome/free-solid-svg-icons';
+import { faSadTear, faSmileWink } from '@fortawesome/free-solid-svg-icons';
 
+import Loader from 'react-loader-spinner';
 
 class TestModal extends React.Component {
     answerTime = 15000;
@@ -36,7 +37,10 @@ class TestModal extends React.Component {
             //Icon to display right or wrong
             justAnswer: false,
             isRight: false,
-            answer: ""
+            answer: "",
+
+            //Submitting state
+            //submitting: false
         }
 
         //Set the root of modal component
@@ -94,7 +98,7 @@ class TestModal extends React.Component {
                 <button 
                     className="button blue-button"
                     style={{background: formatColor(collectionColor)}}
-                    onClick={() => this.props.onDoneClicked()}>
+                    onClick={() => this.props.onDoneClicked(currentScore, totalQuestion)}>
                     Done
                 </button>
             </div>
@@ -200,6 +204,18 @@ class TestModal extends React.Component {
         )
     }
 
+    renderLoading() {
+        return (
+            <div className="loader-wrapper">
+                <Loader
+                    type="Puff"
+                    color="#2A9D8F"
+                    height={100}
+                    width={100}/>
+            </div>
+        )
+    }
+
     componentDidMount() {
         //Create interval task -> Get the id
         const intervalId = setInterval(this.updateQuestion, 500);
@@ -280,7 +296,7 @@ class TestModal extends React.Component {
 
     render() {
         //Get the isOpen from props
-        const { isOpen } = this.props;
+        const { isOpen, submitting } = this.props;
 
         //Get the state
         const { started, ended } = this.state;
@@ -320,7 +336,11 @@ class TestModal extends React.Component {
                     (
                         !ended ? 
                         this.renderQuestion() :
-                        this.renderResult()
+                        (
+                            submitting ?
+                            this.renderLoading() :
+                            this.renderResult()
+                        )
                     )
                 }
             </Modal>
