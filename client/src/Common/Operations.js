@@ -182,6 +182,18 @@ function submitScore(collectionId, rightQuestions, totalQuestions) {
     return makeRequest( `/tests/${collectionId}`, { rightQuestions, totalQuestions }, 'post', true);
 }
 
+//Get score from specific collection
+function getCollectionScores(id) {
+    console.log(id);
+    return axios({
+        method: 'GET',
+        url: `/tests/${id}`,
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+}
+
 export {
     //Collection operations
     getAllCollections,
@@ -206,5 +218,6 @@ export {
 
     //Score operations
     getAllScores,
+    getCollectionScores,
     submitScore
 }

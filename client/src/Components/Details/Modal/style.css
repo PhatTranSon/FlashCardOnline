@@ -88,3 +88,9 @@
 .loader-wrapper div {
     display: inline-block;
 }
+
+/* Modify tab parent */
+.tab-parent {
+    width: 100%;
+    margin-top: 5vh;
+}

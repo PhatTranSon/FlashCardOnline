@@ -72,6 +72,9 @@ const getTestResult = (req, resp) => {
             where: {
                 userId,
                 collectionId
+            },
+            attributes: {
+                include: [[sequelize.fn('date_format', sequelize.col('score.createdAt'), '%Y/%m/%d'), 'createdAt']]
             }
         })
         .then(scores => {
@@ -109,11 +112,26 @@ const postTestResult = (req, resp) => {
             totalQuestions
         })
         .then(score => {
+            //Map to get the id
+            return score.id;
+        })
+        .then(id => {
+            return Score.findOne({
+                where: {
+                    id
+                },
+                attributes: {
+                    include: [
+                        [sequelize.fn('date_format', sequelize.col('score.createdAt'), '%Y/%m/%d'), 'createdAt']
+                    ]
+                }
+            });
+        })
+        .then(score => {
             //Respond
             resp.json({
-                message: "Successfully added score",
-                rightQuestions: score.dataValues.rightQuestions,
-                totalQuestions: score.dataValues.totalQuestions
+                message: "Successfully submitted score",
+                ...score.dataValues
             });
             resp.end();
         })

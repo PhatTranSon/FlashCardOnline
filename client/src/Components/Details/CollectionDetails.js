@@ -18,7 +18,8 @@ import {
     likeCard,
     unlikeCard,
     deleteCard,
-    submitScore
+    submitScore,
+    getCollectionScores
 } from '../../Common/Operations';
 
 import {
@@ -40,6 +41,9 @@ import {
 } from '../../Common/Operations';
 import CardModal from './Modal/AddCardPanel';
 import TestModal from './Modal/TestModal';
+import TabParent from '../Panel/Tab/TabParent';
+import TabChild from '../Panel/Tab/TabChild';
+import CollectionResultTable from './Table/CollectionResultTable';
 
 class CollectionDetails extends React.Component {
     constructor(props) {
@@ -80,11 +84,15 @@ class CollectionDetails extends React.Component {
             //Test modal open or not
             testModalOpen: false,
             testModalToggle: 0,
-            testModalSubmitting: false
+            testModalSubmitting: false,
+
+            //Scores
+            scores: []
         }
 
         this.loadCollection = this.loadCollection.bind(this);
         this.loadCards = this.loadCards.bind(this);
+        this.loadScores = this.loadScores.bind(this);
         this.returnHome = this.returnHome.bind(this);
         this.onAdd = this.onAdd.bind(this);
         this.onEdit = this.onEdit.bind(this);
@@ -100,7 +108,6 @@ class CollectionDetails extends React.Component {
 
     componentDidMount() {
         this.loadCollection();
-        this.loadCards();
     }
 
     loadCollection() {
@@ -122,6 +129,10 @@ class CollectionDetails extends React.Component {
                 this.setState({ 
                     ...collection,
                     collectionLoading: false
+                }, () => {
+                    //Call load cards and results
+                    this.loadCards();
+                    this.loadScores();
                 });
             })
             .catch(error => {
@@ -152,6 +163,33 @@ class CollectionDetails extends React.Component {
                 this.setState({
                     error: true
                 });
+            });
+    }
+
+    loadScores() {
+        //Get the collection id
+        const collectionId = this.state.id;
+
+        //Get scores
+        getCollectionScores(collectionId)
+            .then(response => {
+                //Scores loaded -> Display
+                const scores = response.data;
+
+                //test log
+                console.log(scores);
+
+                //Set scores
+                this.setState({
+                    scores
+                });
+            })
+            .catch(error => {
+                //Get status
+                const status = error.response.status;
+
+                //TODO: Error Handling
+
             });
     }
 
@@ -282,11 +320,13 @@ class CollectionDetails extends React.Component {
                 const score = response.data;
 
                 //Add to scores -> TODO
+                const { scores } = this.state;
 
                 //Set loading to off and close modal
                 this.setState({
                     testModalSubmitting: false,
-                    testModalOpen: false
+                    testModalOpen: false,
+                    scores: [...scores, score]
                 });
             })
             .catch(error => {
@@ -376,7 +416,8 @@ class CollectionDetails extends React.Component {
             back,
             updateModalOpen, updateModalSuccess, updateModalError, updateModalMessage,
             cardModalOpen, cardModalSuccess, cardModalError, cardModalMessage,
-            testModalOpen, testModalToggle, testModalSubmitting
+            testModalOpen, testModalToggle, testModalSubmitting,
+            scores
         } = this.state;
 
         //Check if user is owner
@@ -431,11 +472,19 @@ class CollectionDetails extends React.Component {
                                 { description }
                             </p>
 
-                            <FlashCards 
-                                cards={cards}
-                                showDelete={owner}
-                                onDeleteCard={this.deleteCard}
-                                onLikeCard={this.likeCard}/>
+                            <TabParent>
+                                <TabChild name="Cards">
+                                    <FlashCards 
+                                        cards={cards}
+                                        showDelete={owner}
+                                        onDeleteCard={this.deleteCard}
+                                        onLikeCard={this.likeCard}/>
+                                </TabChild>
+
+                                <TabChild name="Quiz">
+                                    <CollectionResultTable scores={scores}/>
+                                </TabChild>
+                            </TabParent>
                             {
                                 owner ? 
                                 <CollectionModal 
