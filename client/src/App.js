@@ -19,13 +19,14 @@ import Signup from './Components/Authentication/Signup';
 import Login from './Components/Authentication/Login';
 import UserPanel from './Components/Panel/UserPanel';
 import CollectionDetails from './Components/Details/CollectionDetails';
+import Home from './Components/Home/Home';
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Switch>
-          <Route exact path="/"></Route>
+          <Route exact path="/" component={Home}/>
           <Route path="/collections/:collectionId" component={CollectionDetails}/>
           <Route path="/signup" render={(props) => <Signup {...props}/>}/>
           <Route path="/login" render={(props) => <Login {...props}/>}/>
