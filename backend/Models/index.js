@@ -30,6 +30,7 @@ database.Collection = require('./collection.model')(sequelizeInstance, Sequelize
 database.Card = require('./card.model')(sequelizeInstance, Sequelize);
 database.CollectionLike = require('./collection_like.model')(sequelizeInstance, Sequelize);
 database.CardLike = require('./card_like.model')(sequelizeInstance, Sequelize);
+database.Score = require('./score.model')(sequelizeInstance, Sequelize);
 
 //Create one-to-many relationship from user to collection
 database.User.hasMany(database.Collection, {
@@ -66,6 +67,23 @@ database.Collection.belongsToMany(database.User, { through: database.CollectionL
 //Create many-to-many card like relationship
 database.User.belongsToMany(database.Card, { through: database.CardLike });
 database.Card.belongsToMany(database.User, { through: database.CardLike });
+
+//Create many-to-many score relationship
+database.User.belongsToMany(database.Collection, { 
+    through: { model:  database.Score, unique: false }, 
+    as: "testee" 
+});
+database.Collection.belongsToMany(database.User, { 
+    through: { model: database.Score, unique: false },
+    as: "test" 
+});
+
+//Extra relationship to use include
+database.User.hasMany(database.Score);
+database.Score.belongsTo(database.User);
+
+database.Collection.hasMany(database.Score);
+database.Score.belongsTo(database.Collection);
 
 //Export database
 module.exports = database;

@@ -840,8 +840,7 @@ class Content extends React.Component {
                             </p>
                             {
                                 myCards.length > 0 ?
-                                <FlashCards 
-                                    title={"Your cards"}
+                                <FlashCards
                                     showDelete={false}
                                     cards={myCards}
                                     showDelete={true}

@@ -24,5 +24,6 @@ database.sequelize.sync()
 require('./Routes/auth.route')(app);
 require('./Routes/collections.route')(app);
 require('./Routes/card.route')(app);
+require('./Routes/test.route')(app);
 
 app.listen(8000, () => { console.log("App is running") });
