@@ -28,15 +28,16 @@ import {
     unlikeCard,
     getLikedCollections,
     deleteCard,
-    getLikedCards
+    getLikedCards,
+    getAllScores
 } from '../../Common/Operations';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { Redirect } from 'react-router-dom';
-import { CircleLoader } from 'react-spinners';
 import Loader from 'react-loader-spinner';
 import Empty from '../Common/Empty';
+import ResultTable from './Table/ResultTable';
 
 class Content extends React.Component {
     constructor(props) {
@@ -46,6 +47,7 @@ class Content extends React.Component {
             //My collections and cards
             myCollections: [],
             myCards: [],
+            myScores: [],
 
             //Hot collections and cards
             hotCollectionsLoading: false,
@@ -73,6 +75,7 @@ class Content extends React.Component {
         //Bind
         this.loadMyCollections = this.loadMyCollections.bind(this);
         this.loadMyCards = this.loadMyCards.bind(this);
+        this.loadMyResults = this.loadMyResults.bind(this);
         this.loadHotCollections = this.loadHotCollections.bind(this);
         this.loadHotCards = this.loadHotCards.bind(this);
         this.loadLikedCollections = this.loadLikedCollections.bind(this);
@@ -93,9 +96,10 @@ class Content extends React.Component {
 
     //Component mounted -> Get data
     componentDidMount() {
-        //Load my cards and collections
+        //Load my cards, collections and results
         this.loadMyCollections();
         this.loadMyCards();
+        this.loadMyResults();
 
         //Load hot cards and collections
         this.loadHotCollections();
@@ -150,6 +154,24 @@ class Content extends React.Component {
                 //Extract error mesage and status
                 const status = error.response.status;
 
+                //TODO: Error handling
+            });
+    }
+
+    loadMyResults() {
+        getAllScores()
+            .then(response => {
+                //Get the scores
+                const scores = response.data;
+                
+                //Set scores
+                this.setState({
+                    myScores: scores
+                });
+            })
+            .catch(error => {
+                //Extract error mesage and status
+                const status = error.response.status;
                 //TODO: Error handling
             });
     }
@@ -738,6 +760,7 @@ class Content extends React.Component {
         const {
             myCollections,
             myCards,
+            myScores,
 
             hotCollections,
             hotCollectionsLoading,
@@ -832,7 +855,7 @@ class Content extends React.Component {
                             }
 
                             { /* Cards */ }
-                            <p style={{marginTop: "2vh"}}>
+                            <p style={{marginTop: "3vh"}}>
                                 <span 
                                     className="section-title">
                                     Your cards
@@ -847,6 +870,20 @@ class Content extends React.Component {
                                     onLikeCard={(id, index) => this.onLikeOwnCard(id, index)}
                                     onDeleteCard={(id, index) => this.onDeleteCard(id, index)}/> :
                                 <Empty title="You have no cards"/>
+                            }
+
+                            { /* Test results */ }
+                            <p style={{marginTop: "3vh", marginBottom: "2vh"}}>
+                                <span 
+                                    className="section-title">
+                                    Quizzes
+                                </span>
+                            </p>
+                            {
+                                myScores.length > 0 ?
+                                <ResultTable 
+                                    scores={myScores}/> :
+                                null
                             }
                         </TabChild>
 

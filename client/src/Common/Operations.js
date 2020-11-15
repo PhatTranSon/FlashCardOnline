@@ -166,6 +166,17 @@ function unlikeCard(id) {
     return makeRequest('/cards/unlikes', { cardId: id }, 'post', true);
 }
 
+//Get all scores
+function getAllScores() {
+    return axios({
+        method: 'GET',
+        url: '/tests',
+        headers: {
+            'Authorization': `Bearer ${getAccessToken()}`
+        }
+    });
+}
+
 export {
     //Collection operations
     getAllCollections,
@@ -186,5 +197,8 @@ export {
     createCard,
     likeCard,
     unlikeCard,
-    deleteCard
+    deleteCard,
+
+    //Score operations
+    getAllScores
 }

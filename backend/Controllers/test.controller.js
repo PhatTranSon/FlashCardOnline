@@ -32,6 +32,9 @@ const getAllTestResults = (req, resp) => {
                         [Op.in]: maxIds
                     },
                 },
+                attributes: {
+                    include: [[sequelize.fn('date_format', sequelize.col('score.createdAt'), '%Y/%m/%d'), 'createdAt']]
+                },
                 include: [
                     {
                         model: Collection

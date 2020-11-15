@@ -59,3 +59,8 @@ body, html {
 .progress::-webkit-progress-value {
     transition: width 0.1s ease-in-out;
 }
+
+/* Links color */
+.green-link {
+    color: #2A9D8F;
+}
