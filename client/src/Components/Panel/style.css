@@ -10,3 +10,8 @@
 .loader-wrapper div {
     display: inline-block;
 }
+
+.section-title {
+    font-size: 3vh;
+    font-weight: 500;
+}

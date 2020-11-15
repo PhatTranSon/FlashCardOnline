@@ -36,6 +36,7 @@ import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { Redirect } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
 import Loader from 'react-loader-spinner';
+import Empty from '../Common/Empty';
 
 class Content extends React.Component {
     constructor(props) {
@@ -808,50 +809,82 @@ class Content extends React.Component {
 
                         <TabChild name="Mine">
                             { /* Collections with add icon */ }
-                            <CollectionCards 
-                                title={
-                                    <p>
-                                        <span style={{marginRight: "2vh"}}>
-                                            Your collections
-                                        </span>
+                            <p>
+                                <span 
+                                    className="section-title" 
+                                    style={{marginRight: "2vh"}}>
+                                    Your collections
+                                </span>
 
-                                        <FontAwesomeIcon 
-                                            icon={ faPlusCircle }
-                                            onClick={() => this.toggleModal()}/>
-                                    </p>
-                                }
-                                cards={myCollections}
-                                onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
-                                onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}
-                                onClickCollection={(id) => this.onCollectionCliked(id)}
-                                showDelete={true}/>
+                                <FontAwesomeIcon 
+                                    icon={ faPlusCircle }
+                                    onClick={() => this.toggleModal()}/>
+                            </p>
+                            {
+                                myCollections.length > 0 ? 
+                                <CollectionCards
+                                    cards={myCollections}
+                                    onDeleteCollection={(id, index) => this.onDeleteCollection(id, index)}
+                                    onLikeCollection={(id, index) => this.onLikeOwnCollection(id, index)}
+                                    onClickCollection={(id) => this.onCollectionCliked(id)}
+                                    showDelete={true}/> :
+                                <Empty title="You have no collections" />
+                            }
 
                             { /* Cards */ }
-                            <FlashCards 
-                                title={"Your cards"}
-                                showDelete={false}
-                                cards={myCards}
-                                showDelete={true}
-                                onLikeCard={(id, index) => this.onLikeOwnCard(id, index)}
-                                onDeleteCard={(id, index) => this.onDeleteCard(id, index)}/>
+                            <p style={{marginTop: "2vh"}}>
+                                <span 
+                                    className="section-title">
+                                    Your cards
+                                </span>
+                            </p>
+                            {
+                                myCards.length > 0 ?
+                                <FlashCards 
+                                    title={"Your cards"}
+                                    showDelete={false}
+                                    cards={myCards}
+                                    showDelete={true}
+                                    onLikeCard={(id, index) => this.onLikeOwnCard(id, index)}
+                                    onDeleteCard={(id, index) => this.onDeleteCard(id, index)}/> :
+                                <Empty title="You have no cards"/>
+                            }
                         </TabChild>
 
                         <TabChild name="Liked">
                             { /* Collections with no add icon */ }
-                            <CollectionCards 
-                                title="Like collections"
-                                cards={likedCollections}
-                                onLikeCollection={(id, index) => this.unlikeLikedCollection(id, index)}
-                                onClickCollection={(id) => this.onCollectionCliked(id)}
-                                showDelete={false}/>
+                            <p style={{marginTop: "2vh"}}>
+                                <span 
+                                    className="section-title">
+                                    Liked collections
+                                </span>
+                            </p>
+                            {
+                                likedCollections.length > 0 ?
+                                <CollectionCards 
+                                    cards={likedCollections}
+                                    onLikeCollection={(id, index) => this.unlikeLikedCollection(id, index)}
+                                    onClickCollection={(id) => this.onCollectionCliked(id)}
+                                    showDelete={false}/> :
+                                <Empty title="You have not liked a collection"/>
+                            }
 
                             { /* Cards */ }
-                            <FlashCards 
-                                title={"Liked cards"}
-                                showDelete={false}
-                                cards={likedCards}
-                                showDelete={false}
-                                onLikeCard={(id, index) => this.unlikeLikedCard(id, index)}/>
+                            <p style={{marginTop: "2vh"}}>
+                                <span 
+                                    className="section-title">
+                                    Liked cards
+                                </span>
+                            </p>
+                            {
+                                likedCards.length > 0 ?
+                                <FlashCards 
+                                    showDelete={false}
+                                    cards={likedCards}
+                                    showDelete={false}
+                                    onLikeCard={(id, index) => this.unlikeLikedCard(id, index)}/> :
+                                <Empty title="You have not liked a card"/>
+                            }
                         </TabChild>
                     </TabParent>
 

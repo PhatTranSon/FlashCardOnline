@@ -4,6 +4,7 @@
     flex-direction: column;  /* make main axis vertical */
     justify-content: center; /* center items vertically, in this case */
     align-items: center; 
+    text-align: center;
     color: white;
     background: #457B9D;
 }
@@ -37,6 +38,7 @@
 #flashcards h2 {
     font-size: 3vh;
     color: rgba(69, 123, 157, 0.5);
+    margin-bottom: 10vh;
 }
 
 #collections {
@@ -55,6 +57,7 @@
 #collections h2 {
     font-size: 3vh;
     color: rgba(69, 123, 157, 0.5);
+    margin-bottom: 10vh;
 }
 
 /* Scrolling behaviors */
